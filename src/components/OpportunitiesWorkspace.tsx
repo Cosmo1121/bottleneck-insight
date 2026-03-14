@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Target, Save, Loader2, Plus, X, TrendingUp } from "lucide-react";
+import { Target, Save, Loader2, Plus, X, TrendingUp, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import type { BottleneckAnalysis, Opportunities, RankedArea, PublicMarketExample } from "@/types/analysis";
 
