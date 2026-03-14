@@ -1,4 +1,4 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download, Upload } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download, Upload, Settings } from "lucide-react";
 import { useRef } from "react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
