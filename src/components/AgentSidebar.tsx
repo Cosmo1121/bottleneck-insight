@@ -32,6 +32,7 @@ interface AgentSidebarProps {
 const AgentSidebar = ({
   activeToolId, onToolSelect,
   analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
+  onExportYaml, onExportMarkdown,
 }: AgentSidebarProps) => {
   return (
     <aside className="w-48 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
