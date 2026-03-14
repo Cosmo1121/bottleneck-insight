@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, XCircle, FileText, Save, Loader2, Tag } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle, FileText, Save, Loader2, Tag, Sparkles } from "lucide-react";
 import type { BottleneckAnalysis } from "@/types/analysis";
 import { useState, useEffect } from "react";
 import EditableTagList from "./EditableTagList";
@@ -7,6 +7,8 @@ interface BottleneckWorkspaceProps {
   analysis: BottleneckAnalysis;
   onSave: (updates: Partial<BottleneckAnalysis>) => void;
   isSaving: boolean;
+  onAutofill?: () => void;
+  isAutofilling?: boolean;
 }
 
 const statusOptions = ["draft", "active", "monitoring", "closed"];
@@ -14,7 +16,7 @@ const stageOptions = ["", "hypothesis", "evidence-gathering", "confirmed", "moni
 const riskOptions = ["", "low", "medium", "high", "very-high"];
 const subjectTypes = ["", "macro_theme", "sector", "industry", "commodity", "geography", "technology", "policy"];
 
-const BottleneckWorkspace = ({ analysis, onSave, isSaving }: BottleneckWorkspaceProps) => {
+const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling }: BottleneckWorkspaceProps) => {
   const [local, setLocal] = useState({
     thesis: analysis.thesis,
     worldview_assumption: analysis.worldview_assumption,
@@ -90,10 +92,20 @@ const BottleneckWorkspace = ({ analysis, onSave, isSaving }: BottleneckWorkspace
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">{analysis.theme}</h1>
         </div>
-        <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50">
-          {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-          Save
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onAutofill}
+            disabled={isAutofilling || isSaving}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-accent text-foreground border border-primary/40 rounded-sm hover:bg-primary/10 disabled:opacity-50 transition-colors"
+          >
+            {isAutofilling ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-primary" />}
+            {isAutofilling ? "Generating..." : "AI Auto-fill"}
+          </button>
+          <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50">
+            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+            Save
+          </button>
+        </div>
       </div>
 
       {/* Meta */}

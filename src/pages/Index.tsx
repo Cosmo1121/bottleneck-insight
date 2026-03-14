@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import { exportAsYaml, exportAsMarkdown } from "@/lib/exportAnalysis";
+import { useAutofillAnalysis } from "@/hooks/useAutofillAnalysis";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import EvidenceWorkspace from "@/components/EvidenceWorkspace";
@@ -38,6 +39,7 @@ const Index = () => {
   const createMutation = useCreateAnalysis();
   const updateMutation = useUpdateAnalysis();
   const deleteMutation = useDeleteAnalysis();
+  const { autofill, isAutofilling } = useAutofillAnalysis();
 
   const activeAnalysis = analyses.find((a) => a.id === activeAnalysisId) ?? null;
 
@@ -93,7 +95,7 @@ const Index = () => {
     if (!activeAnalysis) return <EmptyState />;
     const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
-      case "scanner": return <BottleneckWorkspace {...shared} />;
+      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave)} isAutofilling={isAutofilling} />;
       case "decision-tree": return <DecisionTreeWorkspace />;
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
