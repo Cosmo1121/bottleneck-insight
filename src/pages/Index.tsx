@@ -39,6 +39,7 @@ const Index = () => {
   const [activeAnalysisId, setActiveAnalysisId] = useState<string | null>(null);
   const [localScores, setLocalScores] = useState<HeatmapScores>(defaultScores);
   const [localRationale, setLocalRationale] = useState<HeatmapRationale>(defaultRationale);
+  const [showMemo, setShowMemo] = useState(false);
 
   const { data: analyses = [], isLoading } = useAnalyses();
   const createMutation = useCreateAnalysis();
@@ -121,7 +122,7 @@ const Index = () => {
     if (!activeAnalysis) return <EmptyState />;
     const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
-      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave, aiSettings)} isAutofilling={isAutofilling} />;
+      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => { activeAnalysis && autofill(activeAnalysis.theme, (updates) => { handleSave(updates); setShowMemo(true); }, aiSettings); }} isAutofilling={isAutofilling} showMemo={showMemo} onDismissMemo={() => setShowMemo(false)} />;
       case "decision-tree": return <DecisionTreeWorkspace onNavigate={setActiveTool} />;
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;

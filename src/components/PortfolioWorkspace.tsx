@@ -3,6 +3,7 @@ import { Briefcase, Shield, Layers, Wrench, Rocket, AlertTriangle, Save, Loader2
 import { motion } from "framer-motion";
 import type { BottleneckAnalysis, PortfolioData, PortfolioLayer, PortfolioRisk } from "@/types/analysis";
 import EditableTagList from "./EditableTagList";
+import PortfolioGate from "./PortfolioGate";
 
 const layerIcons = [Shield, Layers, Wrench, Rocket, AlertTriangle];
 const layerStyles = [
@@ -86,6 +87,8 @@ const PortfolioWorkspace = ({ analysis, onSave, isSaving }: PortfolioWorkspacePr
           </button>
         </div>
       </div>
+
+      <PortfolioGate analysis={analysis} />
 
       <div className="space-y-3">
         {portfolio.layers.map((layer, i) => {

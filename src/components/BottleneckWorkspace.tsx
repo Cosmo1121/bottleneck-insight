@@ -1,7 +1,9 @@
-import { AlertTriangle, CheckCircle2, XCircle, FileText, Save, Loader2, Tag, Sparkles } from "lucide-react";
+import { AlertTriangle, Save, Loader2, Tag, Sparkles, FileText } from "lucide-react";
 import type { BottleneckAnalysis } from "@/types/analysis";
 import { useState, useEffect } from "react";
 import EditableTagList from "./EditableTagList";
+import ThesisSynthesis from "./ThesisSynthesis";
+import AIAnalystMemo from "./AIAnalystMemo";
 
 interface BottleneckWorkspaceProps {
   analysis: BottleneckAnalysis;
@@ -9,6 +11,8 @@ interface BottleneckWorkspaceProps {
   isSaving: boolean;
   onAutofill?: () => void;
   isAutofilling?: boolean;
+  showMemo?: boolean;
+  onDismissMemo?: () => void;
 }
 
 const statusOptions = ["draft", "active", "monitoring", "closed"];
@@ -16,7 +20,7 @@ const stageOptions = ["", "hypothesis", "evidence-gathering", "confirmed", "moni
 const riskOptions = ["", "low", "medium", "high", "very-high"];
 const subjectTypes = ["", "macro_theme", "sector", "industry", "commodity", "geography", "technology", "policy"];
 
-const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling }: BottleneckWorkspaceProps) => {
+const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling, showMemo, onDismissMemo }: BottleneckWorkspaceProps) => {
   const [local, setLocal] = useState({
     thesis: analysis.thesis,
     worldview_assumption: analysis.worldview_assumption,
@@ -107,6 +111,12 @@ const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofil
           </button>
         </div>
       </div>
+
+      {/* Synthesis Block — guides the user before they read the form */}
+      <ThesisSynthesis analysis={analysis} />
+
+      {/* AI Analyst Memo — shown after autofill */}
+      <AIAnalystMemo analysis={analysis} visible={showMemo ?? false} onDismiss={onDismissMemo ?? (() => {})} />
 
       {/* Meta */}
       <div className="panel">
