@@ -208,7 +208,13 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    let content: string;
+
+    if (custom_provider === "anthropic" && custom_api_key) {
+      content = data.content?.[0]?.text;
+    } else {
+      content = data.choices?.[0]?.message?.content;
+    }
     if (!content) throw new Error("No content returned from AI");
 
     // Strip markdown fences if present
