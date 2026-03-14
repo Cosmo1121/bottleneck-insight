@@ -1,5 +1,9 @@
 import yaml from "js-yaml";
 import type { BottleneckAnalysis } from "@/types/analysis";
+import {
+  defaultScores, defaultRationale, defaultValueChain, defaultPortfolio,
+  defaultScarcityEvidence, defaultOpportunities, defaultThesisBreakersStructured, defaultMonitoring,
+} from "@/types/analysis";
 
 const buildSchemaObject = (a: BottleneckAnalysis) => ({
   schema_version: "1.0.0",
@@ -245,4 +249,85 @@ export function exportAsMarkdown(analysis: BottleneckAnalysis) {
 
   const slug = analysis.theme.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
   downloadFile(lines.join("\n"), `${slug}.md`, "text/markdown");
+}
+
+export function parseYamlImport(content: string): Partial<BottleneckAnalysis> & { theme: string } {
+  const obj: any = yaml.load(content);
+  if (!obj) throw new Error("Empty YAML file");
+
+  // Support both flat format (direct DB fields) and schema format (nested sections)
+  if (obj.subject?.name || obj.meta) {
+    // Schema format
+    return {
+      theme: obj.subject?.name || obj.meta?.theme || "Imported Analysis",
+      analyst: obj.meta?.analyst || "",
+      agent_name: obj.meta?.agent_name || "",
+      source_context: obj.meta?.source_context || "",
+      status: obj.meta?.status || "draft",
+      tags: obj.meta?.tags || [],
+      subject_type: obj.subject?.type || "",
+      subject_description: obj.subject?.description || "",
+      geography_list: obj.subject?.geography || [],
+      time_horizon: obj.subject?.time_horizon || "",
+      public_markets_only: obj.subject?.public_markets_only ?? true,
+      risk_level: obj.subject?.risk_level || "",
+      thesis: obj.thesis?.one_sentence_thesis || "",
+      worldview_assumption: obj.thesis?.worldview_assumption || "",
+      structural_shift: obj.thesis?.structural_shift || [],
+      demand_wave: obj.thesis?.demand_wave || "",
+      thesis_stage: obj.thesis?.thesis_stage || "",
+      primary_bottleneck: obj.constraints?.primary_bottleneck || "",
+      scarcity_types: obj.constraints?.scarcity_types || [],
+      constraint_description: obj.constraints?.constraint_description || "",
+      constraint_measurable: obj.constraints?.measurable ?? false,
+      why_now: obj.constraints?.why_now || "",
+      time_to_resolve: obj.constraints?.time_to_resolve || "",
+      scarcity_evidence: obj.scarcity_evidence ? { ...defaultScarcityEvidence, ...obj.scarcity_evidence } : defaultScarcityEvidence,
+      scores: obj.heatmap?.scores || defaultScores,
+      heatmap_rationale: obj.heatmap?.rationale || defaultRationale,
+      value_chain: obj.value_chain ? {
+        demand_creators: obj.value_chain.demand_creators || [],
+        bottleneck_owners: obj.value_chain.bottleneck_owners || [],
+        picks_and_shovels: obj.value_chain.picks_and_shovels || [],
+        infrastructure: obj.value_chain.enabling_infrastructure || [],
+        integrators: obj.value_chain.integrators || [],
+        operators: obj.value_chain.downstream_operators || [],
+      } : defaultValueChain,
+      second_order_beneficiaries: obj.value_chain?.second_order_beneficiaries || [],
+      likely_losers: obj.value_chain?.likely_losers || [],
+      value_capture_layer: obj.value_chain?.value_capture_layer || "",
+      transmission_mechanism: obj.value_chain?.transmission_mechanism || "",
+      opportunities: obj.opportunities ? {
+        ranked_areas: obj.opportunities.ranked_areas || [],
+        public_market_examples: obj.opportunities.optional_public_market_examples || [],
+      } : defaultOpportunities,
+      false_friends: obj.false_friends?.assets || [],
+      portfolio: obj.portfolio_translation ? {
+        layers: [
+          { label: "Core Bottleneck", weight: 40, items: obj.portfolio_translation.core_bottleneck_layer || [] },
+          { label: "Supporting Infrastructure", weight: 25, items: obj.portfolio_translation.supporting_infrastructure || [] },
+          { label: "Picks & Shovels", weight: 20, items: obj.portfolio_translation.picks_and_shovels || [] },
+          { label: "Speculative Satellite", weight: 10, items: obj.portfolio_translation.speculative_satellite || [] },
+          { label: "Risk Hedges", weight: 5, items: obj.portfolio_translation.hedges_or_offsets || [] },
+        ],
+        risks: [],
+      } : defaultPortfolio,
+      concentration_risk: obj.portfolio_translation?.concentration_risk || "",
+      crowding_risk: obj.portfolio_translation?.crowding_risk || "",
+      correlation_risk: obj.portfolio_translation?.correlation_risk || "",
+      implementation_notes: obj.portfolio_translation?.implementation_notes || "",
+      thesis_breakers_structured: obj.thesis_breakers ? { ...defaultThesisBreakersStructured, ...obj.thesis_breakers } : defaultThesisBreakersStructured,
+      monitoring: obj.monitoring ? { ...defaultMonitoring, ...obj.monitoring } : defaultMonitoring,
+      overall_confidence: obj.confidence?.overall_confidence ?? 0,
+      confidence_notes: obj.confidence?.confidence_notes || "",
+      major_unknowns: obj.confidence?.major_unknowns || [],
+      scarcity_strength: obj.summary?.scarcity_strength || "",
+      investment_priority: obj.summary?.investment_priority || "",
+      final_assessment: obj.summary?.final_assessment || "",
+    };
+  }
+
+  // Flat format (direct DB fields)
+  if (!obj.theme) throw new Error("YAML must contain a 'theme' field or use the schema format");
+  return obj;
 }

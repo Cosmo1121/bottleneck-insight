@@ -1,1 +1,13 @@
 project_id = "uwqtizxvbdgkxjhswgpf"
+
+[functions.autofill-analysis]
+verify_jwt = false
+
+[functions.api]
+verify_jwt = false
+
+[functions.chat-analysis]
+verify_jwt = false
+
+[functions.mcp]
+verify_jwt = false
