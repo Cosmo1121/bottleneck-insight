@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
+import { exportAsYaml, exportAsMarkdown } from "@/lib/exportAnalysis";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import EvidenceWorkspace from "@/components/EvidenceWorkspace";
