@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
 
-const lovableModels = [
+const availableModels = [
   { value: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (Fast)", desc: "Default — balanced speed & capability" },
   { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", desc: "Good multimodal, lower cost" },
   { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite", desc: "Fastest, cheapest — simple tasks" },
@@ -27,12 +27,12 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
   const [connError, setConnError] = useState("");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
-  const activeModel = lovableModels.find((m) => m.value === settings.model);
+  const activeModel = availableModels.find((m) => m.value === settings.model);
 
   const providerLabel = () => {
     if (settings.customProvider === "ollama") return "Ollama";
     if (settings.customProvider) return settings.customProvider.charAt(0).toUpperCase() + settings.customProvider.slice(1);
-    return "Lovable AI";
+    return "Built-in AI";
   };
 
   const modelLabel = () => {
@@ -71,10 +71,10 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           </div>
           <div className="p-4 space-y-3">
             <p className="text-xs text-muted-foreground">
-              Select which model powers auto-fill and chat. All models are available via Lovable AI — no API key needed.
+              Select which model powers auto-fill and chat. All models are available out of the box — no API key needed.
             </p>
             <div className="grid gap-2">
-              {lovableModels.map((model) => {
+              {availableModels.map((model) => {
                 const isActive = settings.model === model.value;
                 return (
                   <motion.button
@@ -114,7 +114,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           <div className="flex items-start gap-2 p-3 rounded-sm bg-accent border border-panel-border">
             <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              By default, all AI features use <span className="text-foreground font-medium">Lovable AI</span> with no setup required.
+              By default, all AI features use the <span className="text-foreground font-medium">built-in AI</span> with no setup required.
               You can also use your own OpenAI/Anthropic key, or connect to a local <span className="text-foreground font-medium">Ollama</span> instance for fully private, open-source models.
             </p>
           </div>
@@ -123,7 +123,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
             <label className="data-label">Provider</label>
             <div className="flex flex-wrap gap-2">
               {[
-                { value: "" as const, label: "Lovable AI" },
+                { value: "" as const, label: "Built-in AI" },
                 { value: "openai" as const, label: "OpenAI" },
                 { value: "anthropic" as const, label: "Anthropic" },
                 { value: "ollama" as const, label: "Ollama (Local)" },
