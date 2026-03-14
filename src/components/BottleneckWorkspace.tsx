@@ -16,7 +16,7 @@ const stageOptions = ["", "hypothesis", "evidence-gathering", "confirmed", "moni
 const riskOptions = ["", "low", "medium", "high", "very-high"];
 const subjectTypes = ["", "macro_theme", "sector", "industry", "commodity", "geography", "technology", "policy"];
 
-const BottleneckWorkspace = ({ analysis, onSave, isSaving }: BottleneckWorkspaceProps) => {
+const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling }: BottleneckWorkspaceProps) => {
   const [local, setLocal] = useState({
     thesis: analysis.thesis,
     worldview_assumption: analysis.worldview_assumption,
