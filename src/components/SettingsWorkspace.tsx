@@ -27,7 +27,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
   const [connError, setConnError] = useState("");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
-  const activeModel = lovableModels.find((m) => m.value === settings.model);
+  const activeModel = availableModels.find((m) => m.value === settings.model);
 
   const providerLabel = () => {
     if (settings.customProvider === "ollama") return "Ollama";
