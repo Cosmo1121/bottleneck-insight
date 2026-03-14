@@ -1,130 +1,144 @@
-import { Activity, TrendingUp, TrendingDown, Minus, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Activity, Save, Loader2, Plus, X, TrendingUp, TrendingDown, Minus, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import type { BottleneckAnalysis, MonitoringData, MonitoringIndicator } from "@/types/analysis";
+import EditableTagList from "./EditableTagList";
 
-type SignalDirection = "confirming" | "neutral" | "disconfirming";
-
-interface Signal {
-  label: string;
-  value: string;
-  direction: SignalDirection;
-  timestamp: string;
-}
-
-const signals: Signal[] = [
-  { label: "Transformer Lead Times", value: "3.5 years", direction: "confirming", timestamp: "2026-03-10" },
-  { label: "Grid Interconnection Queue", value: "2,600 GW backlog", direction: "confirming", timestamp: "2026-03-08" },
-  { label: "Utility Capex Guidance", value: "+52% YoY avg", direction: "confirming", timestamp: "2026-03-05" },
-  { label: "Natural Gas Prices", value: "$3.20/MMBtu", direction: "neutral", timestamp: "2026-03-12" },
-  { label: "AI Chip Efficiency Gains", value: "15% improvement", direction: "neutral", timestamp: "2026-02-28" },
-  { label: "Nuclear Permit Fast-Track", value: "No policy change", direction: "confirming", timestamp: "2026-03-01" },
-  { label: "Data Center Demand Growth", value: "+38% YoY", direction: "confirming", timestamp: "2026-03-11" },
-  { label: "Battery Storage Costs", value: "-8% YoY", direction: "neutral", timestamp: "2026-03-07" },
-];
-
-const directionConfig = {
-  confirming: { icon: TrendingUp, color: "text-evidence-green", bg: "bg-evidence-green/10", label: "Confirming" },
-  neutral: { icon: Minus, color: "text-bottleneck-amber", bg: "bg-bottleneck-amber/10", label: "Neutral" },
-  disconfirming: { icon: TrendingDown, color: "text-thesis-breaker", bg: "bg-thesis-breaker/10", label: "Disconfirming" },
+const emptyIndicator: MonitoringIndicator = {
+  indicator: "", category: "", current_signal: "", desired_direction: "", frequency: "", notes: "",
 };
 
-const MonitorWorkspace = () => {
-  const confirming = signals.filter((s) => s.direction === "confirming").length;
-  const neutral = signals.filter((s) => s.direction === "neutral").length;
-  const disconfirming = signals.filter((s) => s.direction === "disconfirming").length;
+const statusOptions = ["", "strong", "intact", "weakening", "broken"];
+const directionOptions = ["", "improving", "stable", "deteriorating"];
+const frequencyOptions = ["", "daily", "weekly", "monthly", "quarterly"];
+
+interface MonitorWorkspaceProps {
+  analysis: BottleneckAnalysis;
+  onSave: (updates: Partial<BottleneckAnalysis>) => void;
+  isSaving: boolean;
+}
+
+const MonitorWorkspace = ({ analysis, onSave, isSaving }: MonitorWorkspaceProps) => {
+  const [mon, setMon] = useState<MonitoringData>(analysis.monitoring);
+
+  useEffect(() => {
+    setMon(analysis.monitoring);
+  }, [analysis.id]);
+
+  const addIndicator = () => {
+    setMon((p) => ({ ...p, key_indicators: [...p.key_indicators, { ...emptyIndicator }] }));
+  };
+
+  const updateIndicator = (idx: number, field: keyof MonitoringIndicator, value: string) => {
+    setMon((p) => {
+      const inds = [...p.key_indicators];
+      inds[idx] = { ...inds[idx], [field]: value };
+      return { ...p, key_indicators: inds };
+    });
+  };
+
+  const removeIndicator = (idx: number) => {
+    setMon((p) => ({ ...p, key_indicators: p.key_indicators.filter((_, i) => i !== idx) }));
+  };
 
   return (
     <main className="flex-1 h-screen overflow-y-auto p-6 space-y-6">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Activity className="w-4 h-4 text-primary" />
-          <span className="data-label">Thesis Monitor</span>
-        </div>
-        <h1 className="font-display text-2xl font-bold text-foreground">
-          Signal Tracking
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track confirming and disconfirming signals to maintain or update the bottleneck thesis.
-        </p>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Confirming", count: confirming, color: "text-evidence-green", border: "border-evidence-green/30" },
-          { label: "Neutral", count: neutral, color: "text-bottleneck-amber", border: "border-bottleneck-amber/30" },
-          { label: "Disconfirming", count: disconfirming, color: "text-thesis-breaker", border: "border-thesis-breaker/30" },
-        ].map((s) => (
-          <div key={s.label} className={`panel ${s.border} p-4 text-center`}>
-            <p className={`font-display text-3xl font-bold ${s.color}`}>{s.count}</p>
-            <p className="data-label mt-1">{s.label}</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Activity className="w-4 h-4 text-primary" />
+            <span className="data-label">Thesis Monitor</span>
           </div>
-        ))}
+          <h1 className="font-display text-2xl font-bold text-foreground">Signal Tracking</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track indicators that confirm or invalidate the thesis.</p>
+        </div>
+        <button onClick={() => onSave({ monitoring: mon })} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50">
+          {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+          Save
+        </button>
       </div>
 
-      {/* Thesis Health */}
+      {/* Thesis Status */}
       <div className="panel">
         <div className="panel-header">
-          <span className="data-label">Thesis Health</span>
-          <span className="ml-auto text-xs font-mono text-evidence-green font-semibold">STRONG — HOLD CONVICTION</span>
+          <span className="data-label">Thesis Status</span>
         </div>
         <div className="p-4">
-          <div className="h-3 bg-accent rounded-sm overflow-hidden flex">
-            <motion.div
-              className="h-full bg-evidence-green"
-              initial={{ width: 0 }}
-              animate={{ width: `${(confirming / signals.length) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
-            <motion.div
-              className="h-full bg-bottleneck-amber"
-              initial={{ width: 0 }}
-              animate={{ width: `${(neutral / signals.length) * 100}%` }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            />
-            <motion.div
-              className="h-full bg-thesis-breaker"
-              initial={{ width: 0 }}
-              animate={{ width: `${(disconfirming / signals.length) * 100}%` }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            />
-          </div>
+          <select
+            value={mon.thesis_status}
+            onChange={(e) => setMon((p) => ({ ...p, thesis_status: e.target.value }))}
+            className="bg-accent text-foreground text-sm px-3 py-2 rounded-sm border border-panel-border font-mono w-full"
+          >
+            {statusOptions.map((s) => <option key={s} value={s}>{s || "Select thesis status..."}</option>)}
+          </select>
         </div>
       </div>
 
-      {/* Signal Feed */}
+      {/* Key Indicators */}
       <div className="panel">
         <div className="panel-header">
-          <span className="data-label">Signal Feed</span>
+          <span className="data-label">Key Indicators</span>
+          <button onClick={addIndicator} className="ml-auto flex items-center gap-1 text-xs text-primary hover:text-foreground transition-colors">
+            <Plus className="w-3 h-3" /> Add Indicator
+          </button>
         </div>
         <div className="divide-y divide-panel-border">
-          {signals.map((signal, i) => {
-            const config = directionConfig[signal.direction];
-            const Icon = config.icon;
-            return (
-              <motion.div
-                key={signal.label}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-                className="px-4 py-3 flex items-center gap-3"
-              >
-                <div className={`w-7 h-7 rounded-sm flex items-center justify-center ${config.bg}`}>
-                  <Icon className={`w-3.5 h-3.5 ${config.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground">{signal.label}</p>
-                  <p className="text-xs text-muted-foreground font-mono">{signal.value}</p>
-                </div>
-                <span className={`text-xs font-mono px-1.5 py-0.5 rounded-sm ${config.bg} ${config.color}`}>
-                  {config.label}
-                </span>
-                <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {signal.timestamp}
-                </span>
-              </motion.div>
-            );
-          })}
+          {mon.key_indicators.length === 0 && (
+            <p className="px-4 py-6 text-xs text-muted-foreground text-center italic">No indicators added yet.</p>
+          )}
+          {mon.key_indicators.map((ind, i) => (
+            <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="data-label">Indicator #{i + 1}</span>
+                <button onClick={() => removeIndicator(i)} className="text-thesis-breaker hover:opacity-80"><X className="w-3 h-3" /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input value={ind.indicator} onChange={(e) => updateIndicator(i, "indicator", e.target.value)} placeholder="Indicator name..." className="bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+                <input value={ind.category} onChange={(e) => updateIndicator(i, "category", e.target.value)} placeholder="Category..." className="bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <input value={ind.current_signal} onChange={(e) => updateIndicator(i, "current_signal", e.target.value)} placeholder="Current signal..." className="bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+                <select value={ind.desired_direction} onChange={(e) => updateIndicator(i, "desired_direction", e.target.value)} className="bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono">
+                  {directionOptions.map((d) => <option key={d} value={d}>{d || "Direction..."}</option>)}
+                </select>
+                <select value={ind.frequency} onChange={(e) => updateIndicator(i, "frequency", e.target.value)} className="bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono">
+                  {frequencyOptions.map((f) => <option key={f} value={f}>{f || "Frequency..."}</option>)}
+                </select>
+              </div>
+              <input value={ind.notes} onChange={(e) => updateIndicator(i, "notes", e.target.value)} placeholder="Notes..." className="w-full bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Evidence lists */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="panel">
+          <div className="panel-header">
+            <TrendingUp className="w-4 h-4 text-evidence-green" />
+            <span className="data-label">Confirming Evidence</span>
+          </div>
+          <div className="p-4">
+            <EditableTagList items={mon.confirming_evidence} onChange={(items) => setMon((p) => ({ ...p, confirming_evidence: items }))} placeholder="Add confirming signal..." tagClassName="bg-evidence-green/10 text-evidence-green border border-evidence-green/20" />
+          </div>
+        </div>
+        <div className="panel">
+          <div className="panel-header">
+            <Minus className="w-4 h-4 text-bottleneck-amber" />
+            <span className="data-label">Weakening Signals</span>
+          </div>
+          <div className="p-4">
+            <EditableTagList items={mon.weakening_signals} onChange={(items) => setMon((p) => ({ ...p, weakening_signals: items }))} placeholder="Add weakening signal..." tagClassName="bg-bottleneck-amber/10 text-bottleneck-amber border border-bottleneck-amber/20" />
+          </div>
+        </div>
+      </div>
+      <div className="panel">
+        <div className="panel-header">
+          <TrendingDown className="w-4 h-4 text-thesis-breaker" />
+          <span className="data-label">Disconfirming Evidence</span>
+        </div>
+        <div className="p-4">
+          <EditableTagList items={mon.disconfirming_evidence} onChange={(items) => setMon((p) => ({ ...p, disconfirming_evidence: items }))} placeholder="Add disconfirming evidence..." tagClassName="bg-thesis-breaker/10 text-thesis-breaker border border-thesis-breaker/20" />
         </div>
       </div>
     </main>
