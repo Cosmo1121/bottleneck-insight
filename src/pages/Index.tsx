@@ -39,6 +39,7 @@ const Index = () => {
   const [activeAnalysisId, setActiveAnalysisId] = useState<string | null>(null);
   const [localScores, setLocalScores] = useState<HeatmapScores>(defaultScores);
   const [localRationale, setLocalRationale] = useState<HeatmapRationale>(defaultRationale);
+  const [showMemo, setShowMemo] = useState(false);
 
   const { data: analyses = [], isLoading } = useAnalyses();
   const createMutation = useCreateAnalysis();
