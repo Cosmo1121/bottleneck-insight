@@ -215,11 +215,11 @@ export function exportAsMarkdown(analysis: BottleneckAnalysis) {
     lines.push("");
   }
 
-  if (obj.opportunities.optional_public_market_examples.length) {
+  if (obj.opportunities.public_market_examples.length) {
     lines.push("### Public Market Examples");
     lines.push("| Ticker | Name | Role | Fit |");
     lines.push("|--------|------|------|-----|");
-    for (const t of obj.opportunities.optional_public_market_examples) {
+    for (const t of obj.opportunities.public_market_examples) {
       lines.push(`| ${t.ticker} | ${t.name} | ${t.role_in_thesis} | ${t.fit_strength} |`);
     }
     lines.push("");
