@@ -85,11 +85,12 @@ const Index = () => {
     });
   }, [activeAnalysisId, localScores, localRationale, updateMutation]);
 
+  const queryClient = useQueryClient();
+
   const handleImportYaml = useCallback(async (content: string) => {
     try {
       const parsed = parseYamlImport(content);
       const { theme, ...rest } = parsed;
-      // Create the analysis first
       const { data, error } = await supabase
         .from("bottleneck_analyses")
         .insert({ theme, ...rest } as any)
@@ -97,15 +98,12 @@ const Index = () => {
         .single();
       if (error) throw error;
       setActiveAnalysisId(data.id);
-      // Refresh the list
-      createMutation.reset();
+      await queryClient.invalidateQueries({ queryKey: ["analyses"] });
       toast.success(`Imported "${theme}"`);
-      // Force re-fetch
-      window.location.reload();
     } catch (e: any) {
       toast.error(`Import failed: ${e.message}`);
     }
-  }, []);
+  }, [queryClient]);
 
   if (isLoading) {
     return (
