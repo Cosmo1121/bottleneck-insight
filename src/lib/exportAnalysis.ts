@@ -299,7 +299,7 @@ export function parseYamlImport(content: string): Partial<BottleneckAnalysis> & 
       transmission_mechanism: obj.value_chain?.transmission_mechanism || "",
       opportunities: obj.opportunities ? {
         ranked_areas: obj.opportunities.ranked_areas || [],
-        public_market_examples: obj.opportunities.optional_public_market_examples || [],
+        public_market_examples: obj.opportunities.public_market_examples || obj.opportunities.optional_public_market_examples || [],
       } : defaultOpportunities,
       false_friends: obj.false_friends?.assets || [],
       portfolio: obj.portfolio_translation ? {
