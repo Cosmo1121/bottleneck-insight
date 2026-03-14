@@ -119,6 +119,8 @@ const Index = () => {
         onCreateAnalysis={handleCreate}
         onDeleteAnalysis={handleDelete}
         isCreating={createMutation.isPending}
+        onExportYaml={() => activeAnalysis && exportAsYaml(activeAnalysis)}
+        onExportMarkdown={() => activeAnalysis && exportAsMarkdown(activeAnalysis)}
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
