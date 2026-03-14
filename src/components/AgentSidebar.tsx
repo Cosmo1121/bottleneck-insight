@@ -1,7 +1,9 @@
 import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap } from "lucide-react";
+import AnalysisSelector from "./AnalysisSelector";
+import type { BottleneckAnalysis } from "@/types/analysis";
 
 const tools = [
-  { id: "scanner", label: "Bottleneck Scanner", icon: Search, active: true },
+  { id: "scanner", label: "Bottleneck Scanner", icon: Search },
   { id: "heatmap", label: "Scarcity Heatmap", icon: BarChart3 },
   { id: "mapper", label: "Value Chain Mapper", icon: GitBranch },
   { id: "portfolio", label: "Portfolio Builder", icon: Briefcase },
@@ -11,18 +13,34 @@ const tools = [
 interface AgentSidebarProps {
   activeToolId: string;
   onToolSelect: (id: string) => void;
+  analyses: BottleneckAnalysis[];
+  activeAnalysisId: string | null;
+  onSelectAnalysis: (id: string) => void;
+  onCreateAnalysis: (theme: string) => void;
+  onDeleteAnalysis: (id: string) => void;
+  isCreating: boolean;
 }
 
-const AgentSidebar = ({ activeToolId, onToolSelect }: AgentSidebarProps) => {
+const AgentSidebar = ({
+  activeToolId, onToolSelect,
+  analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
+}: AgentSidebarProps) => {
   return (
     <aside className="w-56 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
       <div className="px-4 py-4 border-b border-sidebar-border flex items-center gap-2">
         <Zap className="w-5 h-5 text-primary" />
-        <span className="font-display font-bold text-sm tracking-wide text-foreground">
-          BOTTLENECK
-        </span>
+        <span className="font-display font-bold text-sm tracking-wide text-foreground">BOTTLENECK</span>
         <span className="font-display text-xs text-muted-foreground font-medium">AGENT</span>
       </div>
+
+      <AnalysisSelector
+        analyses={analyses}
+        activeId={activeAnalysisId}
+        onSelect={onSelectAnalysis}
+        onCreate={onCreateAnalysis}
+        onDelete={onDeleteAnalysis}
+        isCreating={isCreating}
+      />
 
       <nav className="flex-1 p-2 space-y-0.5">
         <p className="data-label px-3 py-2">Agent Toolkit</p>

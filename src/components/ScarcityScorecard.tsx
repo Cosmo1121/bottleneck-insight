@@ -1,16 +1,5 @@
 import { motion } from "framer-motion";
-
-interface HeatmapScores {
-  scarcity_severity: number;
-  supply_response_speed: number;
-  time_to_add_capacity: number;
-  capital_intensity: number;
-  regulatory_friction: number;
-  demand_growth: number;
-  pricing_power: number;
-  barriers_to_entry: number;
-  market_crowding: number;
-}
+import type { HeatmapScores } from "@/types/analysis";
 
 interface ScarcityScorecardProps {
   scores: HeatmapScores;
