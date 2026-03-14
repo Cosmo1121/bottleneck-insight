@@ -75,7 +75,7 @@ const buildSchemaObject = (a: BottleneckAnalysis) => ({
   },
   opportunities: {
     ranked_areas: a.opportunities.ranked_areas,
-    optional_public_market_examples: a.opportunities.public_market_examples,
+    public_market_examples: a.opportunities.public_market_examples,
   },
   false_friends: {
     assets: a.false_friends,
