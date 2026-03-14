@@ -16,8 +16,10 @@ import PortfolioWorkspace from "@/components/PortfolioWorkspace";
 import ThesisBreakersWorkspace from "@/components/ThesisBreakersWorkspace";
 import MonitorWorkspace from "@/components/MonitorWorkspace";
 import SummaryWorkspace from "@/components/SummaryWorkspace";
+import SettingsWorkspace from "@/components/SettingsWorkspace";
 import ScarcityScorecard from "@/components/ScarcityScorecard";
 import { useAnalyses, useCreateAnalysis, useUpdateAnalysis, useDeleteAnalysis } from "@/hooks/useAnalyses";
+import { useAISettings } from "@/hooks/useAISettings";
 import { defaultScores, defaultRationale } from "@/types/analysis";
 import type { BottleneckAnalysis, HeatmapScores, HeatmapRationale } from "@/types/analysis";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +45,7 @@ const Index = () => {
   const updateMutation = useUpdateAnalysis();
   const deleteMutation = useDeleteAnalysis();
   const { autofill, isAutofilling } = useAutofillAnalysis();
+  const { settings: aiSettings, updateSettings: updateAISettings, resetSettings: resetAISettings } = useAISettings();
 
   const activeAnalysis = analyses.find((a) => a.id === activeAnalysisId) ?? null;
 
@@ -118,7 +121,7 @@ const Index = () => {
     if (!activeAnalysis) return <EmptyState />;
     const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
-      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave)} isAutofilling={isAutofilling} />;
+      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave, aiSettings)} isAutofilling={isAutofilling} />;
       case "decision-tree": return <DecisionTreeWorkspace onNavigate={setActiveTool} />;
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
@@ -129,6 +132,7 @@ const Index = () => {
       case "thesis-breakers": return <ThesisBreakersWorkspace {...shared} />;
       case "monitor": return <MonitorWorkspace {...shared} />;
       case "summary": return <SummaryWorkspace {...shared} />;
+      case "settings": return <SettingsWorkspace settings={aiSettings} onUpdate={updateAISettings} onReset={resetAISettings} />;
       default: return <BottleneckWorkspace {...shared} />;
     }
   };

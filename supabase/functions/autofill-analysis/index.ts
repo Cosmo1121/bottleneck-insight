@@ -128,28 +128,66 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { theme } = await req.json();
+    const { theme, model, custom_provider, custom_api_key } = await req.json();
     if (!theme) throw new Error("theme is required");
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    let apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    let apiKey = "";
+    let selectedModel = model || "google/gemini-3-flash-preview";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        max_tokens: 8192,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
-        ],
-        temperature: 0.3,
-      }),
-    });
+    if (custom_provider && custom_api_key) {
+      if (custom_provider === "openai") {
+        apiUrl = "https://api.openai.com/v1/chat/completions";
+        selectedModel = "gpt-4o";
+      } else if (custom_provider === "anthropic") {
+        apiUrl = "https://api.anthropic.com/v1/messages";
+        // Anthropic handled separately below
+      }
+      apiKey = custom_api_key;
+    } else {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+      apiKey = LOVABLE_API_KEY;
+    }
+
+    let response: Response;
+
+    if (custom_provider === "anthropic" && custom_api_key) {
+      response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 8192,
+          system: SYSTEM_PROMPT,
+          messages: [
+            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
+          ],
+          temperature: 0.3,
+        }),
+      });
+    } else {
+      response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          max_tokens: 8192,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
+          ],
+          temperature: 0.3,
+        }),
+      });
+    }
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -170,7 +208,13 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    let content: string;
+
+    if (custom_provider === "anthropic" && custom_api_key) {
+      content = data.content?.[0]?.text;
+    } else {
+      content = data.choices?.[0]?.message?.content;
+    }
     if (!content) throw new Error("No content returned from AI");
 
     // Strip markdown fences if present

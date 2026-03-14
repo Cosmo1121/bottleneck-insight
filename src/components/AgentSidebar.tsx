@@ -1,4 +1,4 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download, Upload } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download, Upload, Settings } from "lucide-react";
 import { useRef } from "react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
@@ -97,6 +97,13 @@ const AgentSidebar = ({
         <button onClick={onExportMarkdown} disabled={!activeAnalysisId} className="nav-item w-full text-left text-xs py-1.5 disabled:opacity-30">
           <Download className="w-3.5 h-3.5 shrink-0" />
           <span>Export Markdown</span>
+        </button>
+        <button
+          onClick={() => onToolSelect("settings")}
+          className={`nav-item w-full text-left text-xs py-1.5 ${activeToolId === "settings" ? "nav-item-active" : ""}`}
+        >
+          <Settings className="w-3.5 h-3.5 shrink-0" />
+          <span>Settings</span>
         </button>
       </div>
     </aside>
