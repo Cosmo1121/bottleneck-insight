@@ -154,7 +154,7 @@ const Index = () => {
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
-      <ChatPanel />
+      <ChatPanel aiSettings={aiSettings} />
     </div>
   );
 };
