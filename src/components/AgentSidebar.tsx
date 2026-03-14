@@ -1,4 +1,5 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download, Upload } from "lucide-react";
+import { useRef } from "react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
@@ -27,13 +28,27 @@ interface AgentSidebarProps {
   isCreating: boolean;
   onExportYaml?: () => void;
   onExportMarkdown?: () => void;
+  onImportYaml?: (content: string) => void;
 }
 
 const AgentSidebar = ({
   activeToolId, onToolSelect,
   analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
-  onExportYaml, onExportMarkdown,
+  onExportYaml, onExportMarkdown, onImportYaml,
 }: AgentSidebarProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      onImportYaml?.(reader.result as string);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   return (
     <aside className="w-48 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
       <div className="px-3 py-3 border-b border-sidebar-border flex items-center gap-2">
@@ -69,7 +84,12 @@ const AgentSidebar = ({
       </nav>
 
       <div className="p-1.5 border-t border-sidebar-border space-y-0.5">
-        <p className="data-label px-2 py-1 text-[10px]">Export</p>
+        <p className="data-label px-2 py-1 text-[10px]">Import / Export</p>
+        <input ref={fileInputRef} type="file" accept=".yaml,.yml" onChange={handleFileChange} className="hidden" />
+        <button onClick={() => fileInputRef.current?.click()} className="nav-item w-full text-left text-xs py-1.5">
+          <Upload className="w-3.5 h-3.5 shrink-0" />
+          <span>Import YAML</span>
+        </button>
         <button onClick={onExportYaml} disabled={!activeAnalysisId} className="nav-item w-full text-left text-xs py-1.5 disabled:opacity-30">
           <Download className="w-3.5 h-3.5 shrink-0" />
           <span>Export YAML</span>

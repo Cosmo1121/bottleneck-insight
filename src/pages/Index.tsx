@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
-import { exportAsYaml, exportAsMarkdown } from "@/lib/exportAnalysis";
+import ChatPanel from "@/components/ChatPanel";
+import { exportAsYaml, exportAsMarkdown, parseYamlImport } from "@/lib/exportAnalysis";
 import { useAutofillAnalysis } from "@/hooks/useAutofillAnalysis";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
@@ -18,6 +19,7 @@ import ScarcityScorecard from "@/components/ScarcityScorecard";
 import { useAnalyses, useCreateAnalysis, useUpdateAnalysis, useDeleteAnalysis } from "@/hooks/useAnalyses";
 import { defaultScores, defaultRationale } from "@/types/analysis";
 import type { BottleneckAnalysis, HeatmapScores, HeatmapRationale } from "@/types/analysis";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 const EmptyState = () => (
@@ -83,6 +85,28 @@ const Index = () => {
     });
   }, [activeAnalysisId, localScores, localRationale, updateMutation]);
 
+  const handleImportYaml = useCallback(async (content: string) => {
+    try {
+      const parsed = parseYamlImport(content);
+      const { theme, ...rest } = parsed;
+      // Create the analysis first
+      const { data, error } = await supabase
+        .from("bottleneck_analyses")
+        .insert({ theme, ...rest } as any)
+        .select("id")
+        .single();
+      if (error) throw error;
+      setActiveAnalysisId(data.id);
+      // Refresh the list
+      createMutation.reset();
+      toast.success(`Imported "${theme}"`);
+      // Force re-fetch
+      window.location.reload();
+    } catch (e: any) {
+      toast.error(`Import failed: ${e.message}`);
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -123,9 +147,11 @@ const Index = () => {
         isCreating={createMutation.isPending}
         onExportYaml={() => activeAnalysis && exportAsYaml(activeAnalysis)}
         onExportMarkdown={() => activeAnalysis && exportAsMarkdown(activeAnalysis)}
+        onImportYaml={handleImportYaml}
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
+      <ChatPanel />
     </div>
   );
 };
