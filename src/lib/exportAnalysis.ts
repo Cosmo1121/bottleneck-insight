@@ -111,7 +111,7 @@ const buildSchemaObject = (a: BottleneckAnalysis) => ({
     thesis_status: a.monitoring.thesis_status,
   },
   confidence: {
-    overall_confidence: a.overall_confidence,
+    overall_confidence: Math.round(a.overall_confidence * 100),
     confidence_notes: a.confidence_notes,
     major_unknowns: a.major_unknowns,
   },
