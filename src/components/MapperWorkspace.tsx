@@ -22,10 +22,18 @@ interface MapperWorkspaceProps {
 const MapperWorkspace = ({ analysis, onSave, isSaving }: MapperWorkspaceProps) => {
   const [chain, setChain] = useState<ValueChainData>(analysis.value_chain);
   const [falseFriends, setFalseFriends] = useState<string[]>(analysis.false_friends);
+  const [secondOrder, setSecondOrder] = useState<string[]>(analysis.second_order_beneficiaries);
+  const [losers, setLosers] = useState<string[]>(analysis.likely_losers);
+  const [valueCaptureLayer, setValueCaptureLayer] = useState(analysis.value_capture_layer);
+  const [transmissionMechanism, setTransmissionMechanism] = useState(analysis.transmission_mechanism);
 
   useEffect(() => {
     setChain(analysis.value_chain);
     setFalseFriends(analysis.false_friends);
+    setSecondOrder(analysis.second_order_beneficiaries);
+    setLosers(analysis.likely_losers);
+    setValueCaptureLayer(analysis.value_capture_layer);
+    setTransmissionMechanism(analysis.transmission_mechanism);
   }, [analysis.id]);
 
   const updateLayer = (key: keyof ValueChainData, items: string[]) => {
