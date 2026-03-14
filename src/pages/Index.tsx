@@ -95,6 +95,8 @@ const Index = () => {
     switch (activeTool) {
       case "scanner":
         return <BottleneckWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
+      case "decision-tree":
+        return <DecisionTreeWorkspace />;
       case "heatmap":
         return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper":
