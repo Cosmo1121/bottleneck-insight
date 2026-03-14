@@ -41,7 +41,14 @@ const MapperWorkspace = ({ analysis, onSave, isSaving }: MapperWorkspaceProps) =
   };
 
   const handleSave = () => {
-    onSave({ value_chain: chain, false_friends: falseFriends });
+    onSave({
+      value_chain: chain,
+      false_friends: falseFriends,
+      second_order_beneficiaries: secondOrder,
+      likely_losers: losers,
+      value_capture_layer: valueCaptureLayer,
+      transmission_mechanism: transmissionMechanism,
+    });
   };
 
   return (
