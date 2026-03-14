@@ -21,7 +21,7 @@ interface OpportunitiesWorkspaceProps {
   onNavigate?: (toolId: string) => void;
 }
 
-const OpportunitiesWorkspace = ({ analysis, onSave, isSaving }: OpportunitiesWorkspaceProps) => {
+const OpportunitiesWorkspace = ({ analysis, onSave, isSaving, onNavigate }: OpportunitiesWorkspaceProps) => {
   const [opps, setOpps] = useState<Opportunities>(analysis.opportunities);
 
   useEffect(() => {
