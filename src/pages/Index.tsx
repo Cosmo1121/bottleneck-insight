@@ -26,7 +26,7 @@ const Index = () => {
       case "scanner":
         return <BottleneckWorkspace />;
       case "heatmap":
-        return <HeatmapWorkspace scores={scores} onScoresChange={setScores} />;
+        return <HeatmapWorkspace scores={scores} onScoresChange={(s) => setScores(s as typeof scores)} />;
       case "mapper":
         return <MapperWorkspace />;
       case "portfolio":
