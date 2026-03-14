@@ -10,11 +10,29 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, model, custom_provider, custom_api_key } = await req.json();
     if (!messages?.length) throw new Error("messages required");
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    let apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    let apiKey = "";
+    let selectedModel = model || "google/gemini-3-flash-preview";
+    let isAnthropic = false;
+
+    if (custom_provider && custom_api_key) {
+      if (custom_provider === "openai") {
+        apiUrl = "https://api.openai.com/v1/chat/completions";
+        selectedModel = model || "gpt-4o";
+      } else if (custom_provider === "anthropic") {
+        apiUrl = "https://api.anthropic.com/v1/messages";
+        selectedModel = model || "claude-sonnet-4-20250514";
+        isAnthropic = true;
+      }
+      apiKey = custom_api_key;
+    } else {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+      apiKey = LOVABLE_API_KEY;
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
