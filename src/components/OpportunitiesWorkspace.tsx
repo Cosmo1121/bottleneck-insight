@@ -153,6 +153,22 @@ const OpportunitiesWorkspace = ({ analysis, onSave, isSaving, onNavigate }: Oppo
           ))}
         </div>
       </div>
+
+      {/* Navigation */}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => onNavigate?.("portfolio")}
+          className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+        >
+          Portfolio <ArrowRight className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => onNavigate?.("summary")}
+          className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm bg-evidence-green/10 text-evidence-green border border-evidence-green/20 hover:bg-evidence-green/20 transition-colors"
+        >
+          Summary <ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
     </main>
   );
 };

@@ -123,7 +123,7 @@ const Index = () => {
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper": return <MapperWorkspace {...shared} />;
-      case "opportunities": return <OpportunitiesWorkspace {...shared} />;
+      case "opportunities": return <OpportunitiesWorkspace {...shared} onNavigate={setActiveTool} />;
       case "bottleneck-map": return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
       case "portfolio": return <PortfolioWorkspace {...shared} />;
       case "thesis-breakers": return <ThesisBreakersWorkspace {...shared} />;
