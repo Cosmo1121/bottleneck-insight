@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bottleneck_analyses: {
+        Row: {
+          created_at: string
+          disconfirming_signals: string[] | null
+          evidence_notes: string[] | null
+          false_friends: string[] | null
+          geography: string | null
+          id: string
+          primary_bottleneck: string | null
+          scarcity_types: string[] | null
+          scores: Json
+          theme: string
+          thesis: string | null
+          thesis_breakers: string[] | null
+          time_horizon: string | null
+          updated_at: string
+          value_chain: Json
+        }
+        Insert: {
+          created_at?: string
+          disconfirming_signals?: string[] | null
+          evidence_notes?: string[] | null
+          false_friends?: string[] | null
+          geography?: string | null
+          id?: string
+          primary_bottleneck?: string | null
+          scarcity_types?: string[] | null
+          scores?: Json
+          theme: string
+          thesis?: string | null
+          thesis_breakers?: string[] | null
+          time_horizon?: string | null
+          updated_at?: string
+          value_chain?: Json
+        }
+        Update: {
+          created_at?: string
+          disconfirming_signals?: string[] | null
+          evidence_notes?: string[] | null
+          false_friends?: string[] | null
+          geography?: string | null
+          id?: string
+          primary_bottleneck?: string | null
+          scarcity_types?: string[] | null
+          scores?: Json
+          theme?: string
+          thesis?: string | null
+          thesis_breakers?: string[] | null
+          time_horizon?: string | null
+          updated_at?: string
+          value_chain?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
