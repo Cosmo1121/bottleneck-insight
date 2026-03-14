@@ -121,7 +121,7 @@ const Index = () => {
     if (!activeAnalysis) return <EmptyState />;
     const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
-      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave)} isAutofilling={isAutofilling} />;
+      case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave, aiSettings)} isAutofilling={isAutofilling} />;
       case "decision-tree": return <DecisionTreeWorkspace onNavigate={setActiveTool} />;
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
@@ -132,6 +132,7 @@ const Index = () => {
       case "thesis-breakers": return <ThesisBreakersWorkspace {...shared} />;
       case "monitor": return <MonitorWorkspace {...shared} />;
       case "summary": return <SummaryWorkspace {...shared} />;
+      case "settings": return <SettingsWorkspace settings={aiSettings} onUpdate={updateAISettings} onReset={resetAISettings} />;
       default: return <BottleneckWorkspace {...shared} />;
     }
   };

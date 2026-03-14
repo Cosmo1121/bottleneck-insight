@@ -98,6 +98,13 @@ const AgentSidebar = ({
           <Download className="w-3.5 h-3.5 shrink-0" />
           <span>Export Markdown</span>
         </button>
+        <button
+          onClick={() => onToolSelect("settings")}
+          className={`nav-item w-full text-left text-xs py-1.5 ${activeToolId === "settings" ? "nav-item-active" : ""}`}
+        >
+          <Settings className="w-3.5 h-3.5 shrink-0" />
+          <span>Settings</span>
+        </button>
       </div>
     </aside>
   );
