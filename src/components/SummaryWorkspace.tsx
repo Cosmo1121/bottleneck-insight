@@ -38,7 +38,7 @@ const SummaryWorkspace = ({ analysis, onSave, isSaving }: SummaryWorkspaceProps)
       final_assessment: analysis.final_assessment,
     });
     setUnknowns(analysis.major_unknowns);
-  }, [analysis.id]);
+  }, [analysis.id, analysis.updated_at]);
 
   const totalScore = Object.values(analysis.scores).reduce((a, b) => a + b, 0);
 
