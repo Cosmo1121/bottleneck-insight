@@ -206,7 +206,14 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                       setConnStatus("testing");
                       setConnError("");
                       try {
-                        const resp = await fetch(`${settings.ollamaUrl}/api/tags`);
+                        const url = settings.ollamaUrl.replace(/\/+$/, "");
+                        const resp = await fetch(`${url}/api/tags`);
+                        const contentType = resp.headers.get("content-type") || "";
+                        if (!contentType.includes("application/json")) {
+                          throw new Error(
+                            "Received HTML instead of JSON. If using the Lovable preview, Ollama on localhost is unreachable — run the app locally (npm run dev) to connect."
+                          );
+                        }
                         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                         const data = await resp.json();
                         const models = (data.models || []).map((m: any) => m.name as string);
@@ -217,7 +224,14 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                         }
                       } catch (err: any) {
                         setConnStatus("error");
-                        setConnError(err?.message || "Cannot reach Ollama");
+                        const msg = err?.message || "Cannot reach Ollama";
+                        if (msg.includes("Unexpected token") || msg.includes("<!doctype")) {
+                          setConnError("Received HTML instead of JSON. If using the Lovable preview, Ollama on localhost is unreachable — run the app locally to connect.");
+                        } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+                          setConnError("Cannot reach Ollama. Ensure it's running with: OLLAMA_ORIGINS=\"*\" ollama serve");
+                        } else {
+                          setConnError(msg);
+                        }
                         setOllamaModels([]);
                       }
                     }}
@@ -234,8 +248,8 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                   </p>
                 )}
                 {connStatus === "error" && (
-                  <p className="flex items-center gap-1 text-[10px] text-destructive">
-                    <XCircle className="w-3 h-3" /> {connError}
+                  <p className="flex items-center gap-1 text-[10px] text-destructive leading-relaxed">
+                    <XCircle className="w-3 h-3 shrink-0" /> {connError}
                   </p>
                 )}
               </div>
