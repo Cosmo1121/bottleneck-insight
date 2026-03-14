@@ -35,7 +35,10 @@ Return ONLY valid JSON (no markdown, no backticks) with this exact structure:
     "industry_warnings": true/false,
     "capex_surge": true/false,
     "utilization_pressure": true/false,
-    "notes": "..."
+    "notes": "...",
+    "evidence_items": [
+      {"source_name":"...","source_type":"earnings_call|industry_report|government_data|news|research_paper|company_filing","date":"YYYY-MM-DD","signal":"...","summary":"...","confidence":0.0-1.0}
+    ]
   },
   "scores": {
     "scarcity_severity": 1-5,
