@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
 
-const lovableModels = [
+const availableModels = [
   { value: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (Fast)", desc: "Default — balanced speed & capability" },
   { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", desc: "Good multimodal, lower cost" },
   { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite", desc: "Fastest, cheapest — simple tasks" },
