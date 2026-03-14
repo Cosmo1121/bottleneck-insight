@@ -91,13 +91,20 @@ const ChatPanel = ({ aiSettings }: ChatPanelProps) => {
   };
 
   const streamEdgeFunction = async (allMessages: Msg[]) => {
+    const body: Record<string, any> = { messages: allMessages };
+    if (aiSettings?.model) body.model = aiSettings.model;
+    if (aiSettings?.customProvider && aiSettings?.customApiKey) {
+      body.custom_provider = aiSettings.customProvider;
+      body.custom_api_key = aiSettings.customApiKey;
+    }
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: allMessages }),
+      body: JSON.stringify(body),
     });
 
     if (!resp.ok) {
