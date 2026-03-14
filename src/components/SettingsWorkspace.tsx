@@ -23,6 +23,9 @@ interface SettingsWorkspaceProps {
 
 const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspaceProps) => {
   const [showKey, setShowKey] = useState(false);
+  const [connStatus, setConnStatus] = useState<"idle" | "testing" | "ok" | "error">("idle");
+  const [connError, setConnError] = useState("");
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
   const activeModel = lovableModels.find((m) => m.value === settings.model);
 
