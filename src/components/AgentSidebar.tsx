@@ -1,4 +1,4 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download } from "lucide-react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
@@ -25,11 +25,14 @@ interface AgentSidebarProps {
   onCreateAnalysis: (theme: string) => void;
   onDeleteAnalysis: (id: string) => void;
   isCreating: boolean;
+  onExportYaml?: () => void;
+  onExportMarkdown?: () => void;
 }
 
 const AgentSidebar = ({
   activeToolId, onToolSelect,
   analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
+  onExportYaml, onExportMarkdown,
 }: AgentSidebarProps) => {
   return (
     <aside className="w-48 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
@@ -65,10 +68,15 @@ const AgentSidebar = ({
         })}
       </nav>
 
-      <div className="p-1.5 border-t border-sidebar-border">
-        <button className="nav-item w-full text-left text-xs py-1.5">
-          <Settings className="w-3.5 h-3.5 shrink-0" />
-          <span>Settings</span>
+      <div className="p-1.5 border-t border-sidebar-border space-y-0.5">
+        <p className="data-label px-2 py-1 text-[10px]">Export</p>
+        <button onClick={onExportYaml} disabled={!activeAnalysisId} className="nav-item w-full text-left text-xs py-1.5 disabled:opacity-30">
+          <Download className="w-3.5 h-3.5 shrink-0" />
+          <span>Export YAML</span>
+        </button>
+        <button onClick={onExportMarkdown} disabled={!activeAnalysisId} className="nav-item w-full text-left text-xs py-1.5 disabled:opacity-30">
+          <Download className="w-3.5 h-3.5 shrink-0" />
+          <span>Export Markdown</span>
         </button>
       </div>
     </aside>

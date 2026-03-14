@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
+import { exportAsYaml, exportAsMarkdown } from "@/lib/exportAnalysis";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import EvidenceWorkspace from "@/components/EvidenceWorkspace";
@@ -118,6 +119,8 @@ const Index = () => {
         onCreateAnalysis={handleCreate}
         onDeleteAnalysis={handleDelete}
         isCreating={createMutation.isPending}
+        onExportYaml={() => activeAnalysis && exportAsYaml(activeAnalysis)}
+        onExportMarkdown={() => activeAnalysis && exportAsMarkdown(activeAnalysis)}
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
