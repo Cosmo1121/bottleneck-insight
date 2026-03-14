@@ -35,14 +35,12 @@ const Index = () => {
 
   const activeAnalysis = analyses.find((a) => a.id === activeAnalysisId) ?? null;
 
-  // Auto-select first analysis
   useEffect(() => {
     if (!activeAnalysisId && analyses.length > 0) {
       setActiveAnalysisId(analyses[0].id);
     }
   }, [analyses, activeAnalysisId]);
 
-  // Sync local scores when analysis changes
   useEffect(() => {
     if (activeAnalysis) {
       setLocalScores(activeAnalysis.scores);
@@ -101,11 +99,11 @@ const Index = () => {
       case "heatmap":
         return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper":
-        return <MapperWorkspace />;
+        return <MapperWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
       case "bottleneck-map":
         return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
       case "portfolio":
-        return <PortfolioWorkspace />;
+        return <PortfolioWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
       case "monitor":
         return <MonitorWorkspace />;
       default:

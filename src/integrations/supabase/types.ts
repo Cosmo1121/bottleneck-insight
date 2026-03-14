@@ -22,6 +22,7 @@ export type Database = {
           false_friends: string[] | null
           geography: string | null
           id: string
+          portfolio: Json
           primary_bottleneck: string | null
           scarcity_types: string[] | null
           scores: Json
@@ -39,6 +40,7 @@ export type Database = {
           false_friends?: string[] | null
           geography?: string | null
           id?: string
+          portfolio?: Json
           primary_bottleneck?: string | null
           scarcity_types?: string[] | null
           scores?: Json
@@ -56,6 +58,7 @@ export type Database = {
           false_friends?: string[] | null
           geography?: string | null
           id?: string
+          portfolio?: Json
           primary_bottleneck?: string | null
           scarcity_types?: string[] | null
           scores?: Json
