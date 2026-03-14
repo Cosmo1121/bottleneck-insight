@@ -22,10 +22,18 @@ interface MapperWorkspaceProps {
 const MapperWorkspace = ({ analysis, onSave, isSaving }: MapperWorkspaceProps) => {
   const [chain, setChain] = useState<ValueChainData>(analysis.value_chain);
   const [falseFriends, setFalseFriends] = useState<string[]>(analysis.false_friends);
+  const [secondOrder, setSecondOrder] = useState<string[]>(analysis.second_order_beneficiaries);
+  const [losers, setLosers] = useState<string[]>(analysis.likely_losers);
+  const [valueCaptureLayer, setValueCaptureLayer] = useState(analysis.value_capture_layer);
+  const [transmissionMechanism, setTransmissionMechanism] = useState(analysis.transmission_mechanism);
 
   useEffect(() => {
     setChain(analysis.value_chain);
     setFalseFriends(analysis.false_friends);
+    setSecondOrder(analysis.second_order_beneficiaries);
+    setLosers(analysis.likely_losers);
+    setValueCaptureLayer(analysis.value_capture_layer);
+    setTransmissionMechanism(analysis.transmission_mechanism);
   }, [analysis.id]);
 
   const updateLayer = (key: keyof ValueChainData, items: string[]) => {
@@ -33,7 +41,14 @@ const MapperWorkspace = ({ analysis, onSave, isSaving }: MapperWorkspaceProps) =
   };
 
   const handleSave = () => {
-    onSave({ value_chain: chain, false_friends: falseFriends });
+    onSave({
+      value_chain: chain,
+      false_friends: falseFriends,
+      second_order_beneficiaries: secondOrder,
+      likely_losers: losers,
+      value_capture_layer: valueCaptureLayer,
+      transmission_mechanism: transmissionMechanism,
+    });
   };
 
   return (
@@ -95,18 +110,43 @@ const MapperWorkspace = ({ analysis, onSave, isSaving }: MapperWorkspaceProps) =
         })}
       </div>
 
-      <div className="panel border-thesis-breaker/30">
-        <div className="panel-header">
-          <TrendingDown className="w-4 h-4 text-thesis-breaker" />
-          <span className="data-label">Likely Losers / False Friends</span>
+      {/* Extended fields */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="panel">
+          <div className="panel-header"><span className="data-label">Second-Order Beneficiaries</span></div>
+          <div className="p-4">
+            <EditableTagList items={secondOrder} onChange={setSecondOrder} placeholder="Add beneficiary..." />
+          </div>
         </div>
+        <div className="panel border-thesis-breaker/30">
+          <div className="panel-header">
+            <TrendingDown className="w-4 h-4 text-thesis-breaker" />
+            <span className="data-label">Likely Losers</span>
+          </div>
+          <div className="p-4">
+            <EditableTagList items={losers} onChange={setLosers} placeholder="Add loser..." tagClassName="bg-thesis-breaker/10 text-thesis-breaker border border-thesis-breaker/20" />
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-header"><span className="data-label">False Friends</span></div>
         <div className="p-4">
-          <EditableTagList
-            items={falseFriends}
-            onChange={setFalseFriends}
-            placeholder="Add false friend..."
-            tagClassName="bg-thesis-breaker/10 text-thesis-breaker border border-thesis-breaker/20"
-          />
+          <EditableTagList items={falseFriends} onChange={setFalseFriends} placeholder="Add false friend..." tagClassName="bg-bottleneck-amber/10 text-bottleneck-amber border border-bottleneck-amber/20" />
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-header"><span className="data-label">Transmission & Value Capture</span></div>
+        <div className="p-4 grid grid-cols-2 gap-3">
+          <div>
+            <label className="data-label mb-1 block">Value Capture Layer</label>
+            <input value={valueCaptureLayer} onChange={(e) => setValueCaptureLayer(e.target.value)} placeholder="Which layer captures most value?" className="w-full bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+          </div>
+          <div>
+            <label className="data-label mb-1 block">Transmission Mechanism</label>
+            <input value={transmissionMechanism} onChange={(e) => setTransmissionMechanism(e.target.value)} placeholder="How does demand propagate?" className="w-full bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground" />
+          </div>
         </div>
       </div>
     </main>
