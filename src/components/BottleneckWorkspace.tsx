@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, XCircle, FileText, Save, Loader2, Tag } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle, FileText, Save, Loader2, Tag, Sparkles } from "lucide-react";
 import type { BottleneckAnalysis } from "@/types/analysis";
 import { useState, useEffect } from "react";
 import EditableTagList from "./EditableTagList";
@@ -7,6 +7,8 @@ interface BottleneckWorkspaceProps {
   analysis: BottleneckAnalysis;
   onSave: (updates: Partial<BottleneckAnalysis>) => void;
   isSaving: boolean;
+  onAutofill?: () => void;
+  isAutofilling?: boolean;
 }
 
 const statusOptions = ["draft", "active", "monitoring", "closed"];
