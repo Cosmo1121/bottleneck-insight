@@ -1,5 +1,5 @@
-import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server } from "lucide-react";
-import { useState } from "react";
+import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server, Plug, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
 
