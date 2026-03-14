@@ -32,7 +32,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
   const providerLabel = () => {
     if (settings.customProvider === "ollama") return "Ollama";
     if (settings.customProvider) return settings.customProvider.charAt(0).toUpperCase() + settings.customProvider.slice(1);
-    return "Lovable AI";
+    return "Built-in AI";
   };
 
   const modelLabel = () => {
