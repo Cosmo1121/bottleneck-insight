@@ -71,7 +71,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           </div>
           <div className="p-4 space-y-3">
             <p className="text-xs text-muted-foreground">
-              Select which model powers auto-fill and chat. All models are available via Lovable AI — no API key needed.
+              Select which model powers auto-fill and chat. All models are available out of the box — no API key needed.
             </p>
             <div className="grid gap-2">
               {lovableModels.map((model) => {
