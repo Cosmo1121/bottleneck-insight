@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import ChatPanel from "@/components/ChatPanel";
