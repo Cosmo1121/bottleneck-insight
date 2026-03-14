@@ -18,6 +18,7 @@ interface OpportunitiesWorkspaceProps {
   analysis: BottleneckAnalysis;
   onSave: (updates: Partial<BottleneckAnalysis>) => void;
   isSaving: boolean;
+  onNavigate?: (toolId: string) => void;
 }
 
 const OpportunitiesWorkspace = ({ analysis, onSave, isSaving }: OpportunitiesWorkspaceProps) => {
