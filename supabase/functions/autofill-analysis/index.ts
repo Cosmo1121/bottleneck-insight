@@ -138,7 +138,7 @@ serve(async (req) => {
     if (custom_provider && custom_api_key) {
       if (custom_provider === "openai") {
         apiUrl = "https://api.openai.com/v1/chat/completions";
-        selectedModel = "gpt-4o";
+        selectedModel = model || "gpt-4o";
       } else if (custom_provider === "anthropic") {
         apiUrl = "https://api.anthropic.com/v1/messages";
         // Anthropic handled separately below

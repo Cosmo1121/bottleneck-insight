@@ -75,7 +75,7 @@ const buildSchemaObject = (a: BottleneckAnalysis) => ({
   },
   opportunities: {
     ranked_areas: a.opportunities.ranked_areas,
-    optional_public_market_examples: a.opportunities.public_market_examples,
+    public_market_examples: a.opportunities.public_market_examples,
   },
   false_friends: {
     assets: a.false_friends,
@@ -111,7 +111,7 @@ const buildSchemaObject = (a: BottleneckAnalysis) => ({
     thesis_status: a.monitoring.thesis_status,
   },
   confidence: {
-    overall_confidence: a.overall_confidence,
+    overall_confidence: Math.round(a.overall_confidence * 100),
     confidence_notes: a.confidence_notes,
     major_unknowns: a.major_unknowns,
   },
@@ -215,11 +215,11 @@ export function exportAsMarkdown(analysis: BottleneckAnalysis) {
     lines.push("");
   }
 
-  if (obj.opportunities.optional_public_market_examples.length) {
+  if (obj.opportunities.public_market_examples.length) {
     lines.push("### Public Market Examples");
     lines.push("| Ticker | Name | Role | Fit |");
     lines.push("|--------|------|------|-----|");
-    for (const t of obj.opportunities.optional_public_market_examples) {
+    for (const t of obj.opportunities.public_market_examples) {
       lines.push(`| ${t.ticker} | ${t.name} | ${t.role_in_thesis} | ${t.fit_strength} |`);
     }
     lines.push("");
@@ -299,7 +299,7 @@ export function parseYamlImport(content: string): Partial<BottleneckAnalysis> & 
       transmission_mechanism: obj.value_chain?.transmission_mechanism || "",
       opportunities: obj.opportunities ? {
         ranked_areas: obj.opportunities.ranked_areas || [],
-        public_market_examples: obj.opportunities.optional_public_market_examples || [],
+        public_market_examples: obj.opportunities.public_market_examples || obj.opportunities.optional_public_market_examples || [],
       } : defaultOpportunities,
       false_friends: obj.false_friends?.assets || [],
       portfolio: obj.portfolio_translation ? {
@@ -318,7 +318,9 @@ export function parseYamlImport(content: string): Partial<BottleneckAnalysis> & 
       implementation_notes: obj.portfolio_translation?.implementation_notes || "",
       thesis_breakers_structured: obj.thesis_breakers ? { ...defaultThesisBreakersStructured, ...obj.thesis_breakers } : defaultThesisBreakersStructured,
       monitoring: obj.monitoring ? { ...defaultMonitoring, ...obj.monitoring } : defaultMonitoring,
-      overall_confidence: obj.confidence?.overall_confidence ?? 0,
+      overall_confidence: obj.confidence?.overall_confidence != null
+        ? (obj.confidence.overall_confidence > 1 ? obj.confidence.overall_confidence / 100 : obj.confidence.overall_confidence)
+        : 0,
       confidence_notes: obj.confidence?.confidence_notes || "",
       major_unknowns: obj.confidence?.major_unknowns || [],
       scarcity_strength: obj.summary?.scarcity_strength || "",
