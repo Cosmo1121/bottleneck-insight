@@ -5,6 +5,7 @@ import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import HeatmapWorkspace from "@/components/HeatmapWorkspace";
 import MapperWorkspace from "@/components/MapperWorkspace";
+import BottleneckMapWorkspace from "@/components/BottleneckMapWorkspace";
 import PortfolioWorkspace from "@/components/PortfolioWorkspace";
 import MonitorWorkspace from "@/components/MonitorWorkspace";
 import ScarcityScorecard from "@/components/ScarcityScorecard";
@@ -101,6 +102,8 @@ const Index = () => {
         return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper":
         return <MapperWorkspace />;
+      case "bottleneck-map":
+        return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
       case "portfolio":
         return <PortfolioWorkspace />;
       case "monitor":
