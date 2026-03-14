@@ -3,18 +3,43 @@ import { useRef } from "react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
-const tools = [
-  { id: "scanner", label: "Scanner", icon: Search },
-  { id: "decision-tree", label: "Decision Tree", icon: TreeDeciduous },
-  { id: "evidence", label: "Evidence", icon: CheckCircle2 },
-  { id: "heatmap", label: "Heatmap", icon: BarChart3 },
-  { id: "mapper", label: "Value Chain", icon: GitBranch },
-  { id: "opportunities", label: "Opportunities", icon: Target },
-  { id: "bottleneck-map", label: "Bottleneck Map", icon: Crosshair },
-  { id: "portfolio", label: "Portfolio", icon: Briefcase },
-  { id: "thesis-breakers", label: "Thesis Breakers", icon: XCircle },
-  { id: "monitor", label: "Monitor", icon: Activity },
-  { id: "summary", label: "Summary", icon: FileCheck },
+const toolGroups = [
+  {
+    label: "1 · Thesis",
+    tools: [
+      { id: "scanner", label: "Scanner", icon: Search },
+      { id: "decision-tree", label: "Decision Tree", icon: TreeDeciduous },
+    ],
+  },
+  {
+    label: "2 · Evidence",
+    tools: [
+      { id: "evidence", label: "Evidence", icon: CheckCircle2 },
+      { id: "heatmap", label: "Heatmap", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "3 · Value Capture",
+    tools: [
+      { id: "mapper", label: "Value Chain", icon: GitBranch },
+      { id: "opportunities", label: "Opportunities", icon: Target },
+      { id: "bottleneck-map", label: "Bottleneck Map", icon: Crosshair },
+    ],
+  },
+  {
+    label: "4 · Expression",
+    tools: [
+      { id: "portfolio", label: "Portfolio", icon: Briefcase },
+      { id: "thesis-breakers", label: "Thesis Breakers", icon: XCircle },
+    ],
+  },
+  {
+    label: "5 · Monitor",
+    tools: [
+      { id: "monitor", label: "Monitor", icon: Activity },
+      { id: "summary", label: "Summary", icon: FileCheck },
+    ],
+  },
 ];
 
 interface AgentSidebarProps {
@@ -66,21 +91,25 @@ const AgentSidebar = ({
       />
 
       <nav className="flex-1 p-1.5 space-y-0.5 overflow-y-auto">
-        <p className="data-label px-2 py-1.5 text-[10px]">Agent Toolkit</p>
-        {tools.map((tool) => {
-          const Icon = tool.icon;
-          const isActive = activeToolId === tool.id;
-          return (
-            <button
-              key={tool.id}
-              onClick={() => onToolSelect(tool.id)}
-              className={`nav-item w-full text-left text-xs py-1.5 ${isActive ? "nav-item-active" : ""}`}
-            >
-              <Icon className="w-3.5 h-3.5 shrink-0" />
-              <span>{tool.label}</span>
-            </button>
-          );
-        })}
+        {toolGroups.map((group) => (
+          <div key={group.label}>
+            <p className="data-label px-2 py-1.5 text-[10px] mt-1">{group.label}</p>
+            {group.tools.map((tool) => {
+              const Icon = tool.icon;
+              const isActive = activeToolId === tool.id;
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => onToolSelect(tool.id)}
+                  className={`nav-item w-full text-left text-xs py-1.5 ${isActive ? "nav-item-active" : ""}`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tool.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="p-1.5 border-t border-sidebar-border space-y-0.5">

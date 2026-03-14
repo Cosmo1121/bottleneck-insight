@@ -88,6 +88,8 @@ const PortfolioWorkspace = ({ analysis, onSave, isSaving }: PortfolioWorkspacePr
         </div>
       </div>
 
+      <PortfolioGate analysis={analysis} />
+
       <div className="space-y-3">
         {portfolio.layers.map((layer, i) => {
           const Icon = layerIcons[i] ?? Briefcase;
