@@ -115,21 +115,36 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
       },
     ];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (isAnthropic) {
+      aiHeaders["x-api-key"] = apiKey;
+      aiHeaders["anthropic-version"] = "2023-06-01";
+    } else {
+      aiHeaders["Authorization"] = `Bearer ${apiKey}`;
+    }
+
+    const aiBody = isAnthropic
+      ? {
+          model: selectedModel,
+          max_tokens: 4096,
+          system: systemPrompt,
+          messages: messages,
+          stream: true,
+        }
+      : {
+          model: selectedModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages,
+          ],
+          tools: isAnthropic ? undefined : tools,
+          stream: true,
+        };
+
+    const response = await fetch(apiUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        tools,
-        stream: true,
-      }),
+      headers: aiHeaders,
+      body: JSON.stringify(aiBody),
     });
 
     if (!response.ok) {
