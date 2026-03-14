@@ -123,7 +123,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
             <label className="data-label">Provider</label>
             <div className="flex flex-wrap gap-2">
               {[
-                { value: "" as const, label: "Lovable AI" },
+                { value: "" as const, label: "Built-in AI" },
                 { value: "openai" as const, label: "OpenAI" },
                 { value: "anthropic" as const, label: "Anthropic" },
                 { value: "ollama" as const, label: "Ollama (Local)" },
