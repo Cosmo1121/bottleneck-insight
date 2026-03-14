@@ -1,4 +1,4 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck, Download } from "lucide-react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
@@ -25,6 +25,8 @@ interface AgentSidebarProps {
   onCreateAnalysis: (theme: string) => void;
   onDeleteAnalysis: (id: string) => void;
   isCreating: boolean;
+  onExportYaml?: () => void;
+  onExportMarkdown?: () => void;
 }
 
 const AgentSidebar = ({
