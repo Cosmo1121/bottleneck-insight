@@ -114,7 +114,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           <div className="flex items-start gap-2 p-3 rounded-sm bg-accent border border-panel-border">
             <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              By default, all AI features use <span className="text-foreground font-medium">Lovable AI</span> with no setup required.
+              By default, all AI features use the <span className="text-foreground font-medium">built-in AI</span> with no setup required.
               You can also use your own OpenAI/Anthropic key, or connect to a local <span className="text-foreground font-medium">Ollama</span> instance for fully private, open-source models.
             </p>
           </div>
