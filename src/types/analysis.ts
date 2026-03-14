@@ -19,6 +19,23 @@ export interface ValueChainData {
   bottleneck_owners: string[];
 }
 
+export interface PortfolioLayer {
+  label: string;
+  weight: number;
+  items: string[];
+}
+
+export interface PortfolioRisk {
+  label: string;
+  level: "Low" | "Medium" | "High";
+  description: string;
+}
+
+export interface PortfolioData {
+  layers: PortfolioLayer[];
+  risks: PortfolioRisk[];
+}
+
 export interface BottleneckAnalysis {
   id: string;
   theme: string;
@@ -30,6 +47,7 @@ export interface BottleneckAnalysis {
   evidence_notes: string[];
   scores: HeatmapScores;
   value_chain: ValueChainData;
+  portfolio: PortfolioData;
   false_friends: string[];
   thesis_breakers: string[];
   disconfirming_signals: string[];
@@ -56,4 +74,15 @@ export const defaultValueChain: ValueChainData = {
   infrastructure: [],
   picks_and_shovels: [],
   bottleneck_owners: [],
+};
+
+export const defaultPortfolio: PortfolioData = {
+  layers: [
+    { label: "Core Bottleneck", weight: 40, items: [] },
+    { label: "Supporting Infrastructure", weight: 25, items: [] },
+    { label: "Picks & Shovels", weight: 20, items: [] },
+    { label: "Speculative Satellite", weight: 10, items: [] },
+    { label: "Risk Hedges", weight: 5, items: [] },
+  ],
+  risks: [],
 };
