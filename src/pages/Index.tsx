@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
+import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import HeatmapWorkspace from "@/components/HeatmapWorkspace";
 import MapperWorkspace from "@/components/MapperWorkspace";
 import PortfolioWorkspace from "@/components/PortfolioWorkspace";
