@@ -1,15 +1,19 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous, Crosshair, CheckCircle2, Target, XCircle, FileCheck } from "lucide-react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
 const tools = [
-  { id: "scanner", label: "Bottleneck Scanner", icon: Search },
+  { id: "scanner", label: "Scanner", icon: Search },
   { id: "decision-tree", label: "Decision Tree", icon: TreeDeciduous },
-  { id: "heatmap", label: "Scarcity Heatmap", icon: BarChart3 },
-  { id: "mapper", label: "Value Chain Mapper", icon: GitBranch },
+  { id: "evidence", label: "Evidence", icon: CheckCircle2 },
+  { id: "heatmap", label: "Heatmap", icon: BarChart3 },
+  { id: "mapper", label: "Value Chain", icon: GitBranch },
+  { id: "opportunities", label: "Opportunities", icon: Target },
   { id: "bottleneck-map", label: "Bottleneck Map", icon: Crosshair },
-  { id: "portfolio", label: "Portfolio Builder", icon: Briefcase },
-  { id: "monitor", label: "Thesis Monitor", icon: Activity },
+  { id: "portfolio", label: "Portfolio", icon: Briefcase },
+  { id: "thesis-breakers", label: "Thesis Breakers", icon: XCircle },
+  { id: "monitor", label: "Monitor", icon: Activity },
+  { id: "summary", label: "Summary", icon: FileCheck },
 ];
 
 interface AgentSidebarProps {
@@ -28,11 +32,10 @@ const AgentSidebar = ({
   analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
 }: AgentSidebarProps) => {
   return (
-    <aside className="w-56 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
-      <div className="px-4 py-4 border-b border-sidebar-border flex items-center gap-2">
-        <Zap className="w-5 h-5 text-primary" />
-        <span className="font-display font-bold text-sm tracking-wide text-foreground">BOTTLENECK</span>
-        <span className="font-display text-xs text-muted-foreground font-medium">AGENT</span>
+    <aside className="w-48 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
+      <div className="px-3 py-3 border-b border-sidebar-border flex items-center gap-2">
+        <Zap className="w-4 h-4 text-primary" />
+        <span className="font-display font-bold text-xs tracking-wide text-foreground">BOTTLENECK</span>
       </div>
 
       <AnalysisSelector
@@ -44,8 +47,8 @@ const AgentSidebar = ({
         isCreating={isCreating}
       />
 
-      <nav className="flex-1 p-2 space-y-0.5">
-        <p className="data-label px-3 py-2">Agent Toolkit</p>
+      <nav className="flex-1 p-1.5 space-y-0.5 overflow-y-auto">
+        <p className="data-label px-2 py-1.5 text-[10px]">Agent Toolkit</p>
         {tools.map((tool) => {
           const Icon = tool.icon;
           const isActive = activeToolId === tool.id;
@@ -53,18 +56,18 @@ const AgentSidebar = ({
             <button
               key={tool.id}
               onClick={() => onToolSelect(tool.id)}
-              className={`nav-item w-full text-left ${isActive ? "nav-item-active" : ""}`}
+              className={`nav-item w-full text-left text-xs py-1.5 ${isActive ? "nav-item-active" : ""}`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-3.5 h-3.5 shrink-0" />
               <span>{tool.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <div className="p-2 border-t border-sidebar-border">
-        <button className="nav-item w-full text-left">
-          <Settings className="w-4 h-4 shrink-0" />
+      <div className="p-1.5 border-t border-sidebar-border">
+        <button className="nav-item w-full text-left text-xs py-1.5">
+          <Settings className="w-3.5 h-3.5 shrink-0" />
           <span>Settings</span>
         </button>
       </div>

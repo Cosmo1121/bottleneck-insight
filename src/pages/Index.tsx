@@ -3,15 +3,19 @@ import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
 import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
+import EvidenceWorkspace from "@/components/EvidenceWorkspace";
 import HeatmapWorkspace from "@/components/HeatmapWorkspace";
 import MapperWorkspace from "@/components/MapperWorkspace";
+import OpportunitiesWorkspace from "@/components/OpportunitiesWorkspace";
 import BottleneckMapWorkspace from "@/components/BottleneckMapWorkspace";
 import PortfolioWorkspace from "@/components/PortfolioWorkspace";
+import ThesisBreakersWorkspace from "@/components/ThesisBreakersWorkspace";
 import MonitorWorkspace from "@/components/MonitorWorkspace";
+import SummaryWorkspace from "@/components/SummaryWorkspace";
 import ScarcityScorecard from "@/components/ScarcityScorecard";
 import { useAnalyses, useCreateAnalysis, useUpdateAnalysis, useDeleteAnalysis } from "@/hooks/useAnalyses";
-import { defaultScores } from "@/types/analysis";
-import type { BottleneckAnalysis, HeatmapScores } from "@/types/analysis";
+import { defaultScores, defaultRationale } from "@/types/analysis";
+import type { BottleneckAnalysis, HeatmapScores, HeatmapRationale } from "@/types/analysis";
 import { Loader2 } from "lucide-react";
 
 const EmptyState = () => (
@@ -27,6 +31,7 @@ const Index = () => {
   const [activeTool, setActiveTool] = useState("scanner");
   const [activeAnalysisId, setActiveAnalysisId] = useState<string | null>(null);
   const [localScores, setLocalScores] = useState<HeatmapScores>(defaultScores);
+  const [localRationale, setLocalRationale] = useState<HeatmapRationale>(defaultRationale);
 
   const { data: analyses = [], isLoading } = useAnalyses();
   const createMutation = useCreateAnalysis();
@@ -36,32 +41,26 @@ const Index = () => {
   const activeAnalysis = analyses.find((a) => a.id === activeAnalysisId) ?? null;
 
   useEffect(() => {
-    if (!activeAnalysisId && analyses.length > 0) {
-      setActiveAnalysisId(analyses[0].id);
-    }
+    if (!activeAnalysisId && analyses.length > 0) setActiveAnalysisId(analyses[0].id);
   }, [analyses, activeAnalysisId]);
 
   useEffect(() => {
     if (activeAnalysis) {
       setLocalScores(activeAnalysis.scores);
+      setLocalRationale(activeAnalysis.heatmap_rationale);
     }
   }, [activeAnalysis?.id]);
 
   const handleCreate = useCallback((theme: string) => {
     createMutation.mutate(theme, {
-      onSuccess: (newAnalysis) => {
-        setActiveAnalysisId(newAnalysis.id);
-        toast.success("Analysis created");
-      },
+      onSuccess: (a) => { setActiveAnalysisId(a.id); toast.success("Analysis created"); },
     });
   }, [createMutation]);
 
   const handleDelete = useCallback((id: string) => {
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        if (activeAnalysisId === id) {
-          setActiveAnalysisId(analyses.find((a) => a.id !== id)?.id ?? null);
-        }
+        if (activeAnalysisId === id) setActiveAnalysisId(analyses.find((a) => a.id !== id)?.id ?? null);
         toast.success("Analysis deleted");
       },
     });
@@ -76,10 +75,10 @@ const Index = () => {
 
   const handleSaveScores = useCallback(() => {
     if (!activeAnalysisId) return;
-    updateMutation.mutate({ id: activeAnalysisId, scores: localScores }, {
+    updateMutation.mutate({ id: activeAnalysisId, scores: localScores, heatmap_rationale: localRationale }, {
       onSuccess: () => toast.success("Scores saved"),
     });
-  }, [activeAnalysisId, localScores, updateMutation]);
+  }, [activeAnalysisId, localScores, localRationale, updateMutation]);
 
   if (isLoading) {
     return (
@@ -91,23 +90,20 @@ const Index = () => {
 
   const renderWorkspace = () => {
     if (!activeAnalysis) return <EmptyState />;
+    const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
-      case "scanner":
-        return <BottleneckWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
-      case "decision-tree":
-        return <DecisionTreeWorkspace />;
-      case "heatmap":
-        return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
-      case "mapper":
-        return <MapperWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
-      case "bottleneck-map":
-        return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
-      case "portfolio":
-        return <PortfolioWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
-      case "monitor":
-        return <MonitorWorkspace />;
-      default:
-        return <BottleneckWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
+      case "scanner": return <BottleneckWorkspace {...shared} />;
+      case "decision-tree": return <DecisionTreeWorkspace />;
+      case "evidence": return <EvidenceWorkspace {...shared} />;
+      case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
+      case "mapper": return <MapperWorkspace {...shared} />;
+      case "opportunities": return <OpportunitiesWorkspace {...shared} />;
+      case "bottleneck-map": return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
+      case "portfolio": return <PortfolioWorkspace {...shared} />;
+      case "thesis-breakers": return <ThesisBreakersWorkspace {...shared} />;
+      case "monitor": return <MonitorWorkspace {...shared} />;
+      case "summary": return <SummaryWorkspace {...shared} />;
+      default: return <BottleneckWorkspace {...shared} />;
     }
   };
 
@@ -124,10 +120,7 @@ const Index = () => {
         isCreating={createMutation.isPending}
       />
       {renderWorkspace()}
-      <ScarcityScorecard
-        scores={activeAnalysis?.scores ?? localScores}
-        theme={activeAnalysis?.theme}
-      />
+      <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
     </div>
   );
 };
