@@ -102,6 +102,8 @@ const Index = () => {
         return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper":
         return <MapperWorkspace />;
+      case "bottleneck-map":
+        return <BottleneckMapWorkspace analyses={analyses} activeAnalysisId={activeAnalysisId} />;
       case "portfolio":
         return <PortfolioWorkspace />;
       case "monitor":
