@@ -170,9 +170,12 @@ const DecisionTreeWorkspace = ({ onNavigate }: DecisionTreeWorkspaceProps) => {
                       </span>
                     )}
                     {node.id === "rank" && visited && (
-                      <span className="text-xs font-mono px-2 py-0.5 rounded-sm bg-evidence-green/10 text-evidence-green border border-evidence-green/20 self-start">
-                        INVEST
-                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate?.("opportunities"); }}
+                        className="text-xs font-mono px-2 py-0.5 rounded-sm bg-evidence-green/10 text-evidence-green border border-evidence-green/20 self-start hover:bg-evidence-green/20 transition-colors"
+                      >
+                        INVEST →
+                      </button>
                     )}
                   </div>
 

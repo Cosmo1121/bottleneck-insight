@@ -119,7 +119,7 @@ const Index = () => {
     const shared = { analysis: activeAnalysis, onSave: handleSave, isSaving: updateMutation.isPending };
     switch (activeTool) {
       case "scanner": return <BottleneckWorkspace {...shared} onAutofill={() => activeAnalysis && autofill(activeAnalysis.theme, handleSave)} isAutofilling={isAutofilling} />;
-      case "decision-tree": return <DecisionTreeWorkspace />;
+      case "decision-tree": return <DecisionTreeWorkspace onNavigate={setActiveTool} />;
       case "evidence": return <EvidenceWorkspace {...shared} />;
       case "heatmap": return <HeatmapWorkspace scores={localScores} rationale={localRationale} onScoresChange={setLocalScores} onRationaleChange={setLocalRationale} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper": return <MapperWorkspace {...shared} />;
