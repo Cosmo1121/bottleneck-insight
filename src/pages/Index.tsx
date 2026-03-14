@@ -58,7 +58,7 @@ const Index = () => {
       setLocalScores(activeAnalysis.scores);
       setLocalRationale(activeAnalysis.heatmap_rationale);
     }
-  }, [activeAnalysis?.id]);
+  }, [activeAnalysis?.id, activeAnalysis?.updated_at]);
 
   const handleCreate = useCallback((theme: string) => {
     createMutation.mutate(theme, {

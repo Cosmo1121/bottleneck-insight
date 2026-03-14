@@ -318,7 +318,9 @@ export function parseYamlImport(content: string): Partial<BottleneckAnalysis> & 
       implementation_notes: obj.portfolio_translation?.implementation_notes || "",
       thesis_breakers_structured: obj.thesis_breakers ? { ...defaultThesisBreakersStructured, ...obj.thesis_breakers } : defaultThesisBreakersStructured,
       monitoring: obj.monitoring ? { ...defaultMonitoring, ...obj.monitoring } : defaultMonitoring,
-      overall_confidence: obj.confidence?.overall_confidence ?? 0,
+      overall_confidence: obj.confidence?.overall_confidence != null
+        ? (obj.confidence.overall_confidence > 1 ? obj.confidence.overall_confidence / 100 : obj.confidence.overall_confidence)
+        : 0,
       confidence_notes: obj.confidence?.confidence_notes || "",
       major_unknowns: obj.confidence?.major_unknowns || [],
       scarcity_strength: obj.summary?.scarcity_strength || "",

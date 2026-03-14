@@ -65,7 +65,7 @@ const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofil
     setScarcityTypes(analysis.scarcity_types);
     setTags(analysis.tags);
     setGeoList(analysis.geography_list);
-  }, [analysis.id]);
+  }, [analysis.id, analysis.updated_at]);
 
   const handleSave = () => {
     onSave({

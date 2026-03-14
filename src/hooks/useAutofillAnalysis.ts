@@ -61,6 +61,11 @@ export const useAutofillAnalysis = () => {
         data = fnData;
       }
 
+      // Normalize AI confidence from 0-100 scale to 0-1
+      if (data.overall_confidence != null && data.overall_confidence > 1) {
+        data.overall_confidence = data.overall_confidence / 100;
+      }
+
       const updates: Partial<BottleneckAnalysis> = {
         ...data,
         scarcity_evidence: {

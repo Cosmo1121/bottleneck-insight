@@ -107,7 +107,7 @@ const SummaryWorkspace = ({ analysis, onSave, isSaving }: SummaryWorkspaceProps)
             <div>
               <label className="data-label mb-1 block">Scarcity Strength</label>
               <select value={local.scarcity_strength} onChange={(e) => setLocal((p) => ({ ...p, scarcity_strength: e.target.value }))} className="w-full bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono">
-                {strengthOptions.map((s) => <option key={s} value={s}>{s || "Select..."}</option>)}
+                {strengthOptions.map((s) => <option key={s} value={s}>{(s && strengthLabels[s]) || s || "Select..."}</option>)}
               </select>
             </div>
             <div>

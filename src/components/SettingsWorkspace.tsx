@@ -171,7 +171,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                 </button>
               </div>
               <p className="text-[10px] text-muted-foreground">
-                Stored in browser localStorage only — never sent to our servers.
+                Stored in localStorage. Sent to backend functions for AI calls — not stored server-side.
               </p>
             </motion.div>
           )}
