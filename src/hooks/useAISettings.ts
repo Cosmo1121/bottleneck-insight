@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 
 export interface AISettings {
   model: string;
-  customProvider: "" | "openai" | "anthropic";
+  customProvider: "" | "openai" | "anthropic" | "ollama";
   customApiKey: string;
+  ollamaUrl: string;
+  ollamaModel: string;
 }
 
 const STORAGE_KEY = "bottleneck-ai-settings";
@@ -12,6 +14,8 @@ const defaults: AISettings = {
   model: "google/gemini-3-flash-preview",
   customProvider: "",
   customApiKey: "",
+  ollamaUrl: "http://localhost:11434",
+  ollamaModel: "llama3.2",
 };
 
 export const useAISettings = () => {
