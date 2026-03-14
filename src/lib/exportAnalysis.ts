@@ -1,5 +1,9 @@
 import yaml from "js-yaml";
 import type { BottleneckAnalysis } from "@/types/analysis";
+import {
+  defaultScores, defaultRationale, defaultValueChain, defaultPortfolio,
+  defaultScarcityEvidence, defaultOpportunities, defaultThesisBreakersStructured, defaultMonitoring,
+} from "@/types/analysis";
 
 const buildSchemaObject = (a: BottleneckAnalysis) => ({
   schema_version: "1.0.0",
