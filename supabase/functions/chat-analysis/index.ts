@@ -243,14 +243,11 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
       }));
 
       // Follow-up call with tool results, streaming
-      const followUp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const followUp = await fetch(apiUrl, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: aiHeaders,
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: selectedModel,
           messages: [
             { role: "system", content: systemPrompt },
             ...messages,
