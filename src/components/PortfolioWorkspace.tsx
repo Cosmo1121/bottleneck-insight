@@ -3,6 +3,7 @@ import { Briefcase, Shield, Layers, Wrench, Rocket, AlertTriangle, Save, Loader2
 import { motion } from "framer-motion";
 import type { BottleneckAnalysis, PortfolioData, PortfolioLayer, PortfolioRisk } from "@/types/analysis";
 import EditableTagList from "./EditableTagList";
+import PortfolioGate from "./PortfolioGate";
 
 const layerIcons = [Shield, Layers, Wrench, Rocket, AlertTriangle];
 const layerStyles = [
