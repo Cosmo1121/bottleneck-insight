@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import BottleneckWorkspace from "@/components/BottleneckWorkspace";
+import DecisionTreeWorkspace from "@/components/DecisionTreeWorkspace";
 import HeatmapWorkspace from "@/components/HeatmapWorkspace";
 import MapperWorkspace from "@/components/MapperWorkspace";
 import PortfolioWorkspace from "@/components/PortfolioWorkspace";
@@ -94,6 +95,8 @@ const Index = () => {
     switch (activeTool) {
       case "scanner":
         return <BottleneckWorkspace analysis={activeAnalysis} onSave={handleSave} isSaving={updateMutation.isPending} />;
+      case "decision-tree":
+        return <DecisionTreeWorkspace />;
       case "heatmap":
         return <HeatmapWorkspace scores={localScores} onScoresChange={setLocalScores} onSave={handleSaveScores} isSaving={updateMutation.isPending} />;
       case "mapper":

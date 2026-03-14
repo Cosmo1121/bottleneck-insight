@@ -1,9 +1,10 @@
-import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap } from "lucide-react";
+import { Search, BarChart3, GitBranch, Briefcase, Activity, Settings, Zap, TreeDeciduous } from "lucide-react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
 
 const tools = [
   { id: "scanner", label: "Bottleneck Scanner", icon: Search },
+  { id: "decision-tree", label: "Decision Tree", icon: TreeDeciduous },
   { id: "heatmap", label: "Scarcity Heatmap", icon: BarChart3 },
   { id: "mapper", label: "Value Chain Mapper", icon: GitBranch },
   { id: "portfolio", label: "Portfolio Builder", icon: Briefcase },
