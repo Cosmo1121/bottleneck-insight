@@ -1,5 +1,5 @@
-import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server } from "lucide-react";
-import { useState } from "react";
+import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server, Plug, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
 
@@ -23,6 +23,9 @@ interface SettingsWorkspaceProps {
 
 const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspaceProps) => {
   const [showKey, setShowKey] = useState(false);
+  const [connStatus, setConnStatus] = useState<"idle" | "testing" | "ok" | "error">("idle");
+  const [connError, setConnError] = useState("");
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
   const activeModel = lovableModels.find((m) => m.value === settings.model);
 
@@ -190,26 +193,78 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
 
               <div className="space-y-2">
                 <label className="data-label">Ollama URL</label>
-                <input
-                  type="text"
-                  value={settings.ollamaUrl}
-                  onChange={(e) => onUpdate({ ollamaUrl: e.target.value })}
-                  placeholder="http://localhost:11434"
-                  className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={settings.ollamaUrl}
+                    onChange={(e) => { onUpdate({ ollamaUrl: e.target.value }); setConnStatus("idle"); setOllamaModels([]); }}
+                    placeholder="http://localhost:11434"
+                    className="flex-1 bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                  />
+                  <button
+                    onClick={async () => {
+                      setConnStatus("testing");
+                      setConnError("");
+                      try {
+                        const resp = await fetch(`${settings.ollamaUrl}/api/tags`);
+                        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                        const data = await resp.json();
+                        const models = (data.models || []).map((m: any) => m.name as string);
+                        setOllamaModels(models);
+                        setConnStatus("ok");
+                        if (models.length > 0 && !models.includes(settings.ollamaModel)) {
+                          onUpdate({ ollamaModel: models[0] });
+                        }
+                      } catch (err: any) {
+                        setConnStatus("error");
+                        setConnError(err?.message || "Cannot reach Ollama");
+                        setOllamaModels([]);
+                      }
+                    }}
+                    disabled={connStatus === "testing"}
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono rounded-sm border border-panel-border bg-accent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30 transition-colors disabled:opacity-50"
+                  >
+                    {connStatus === "testing" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plug className="w-3 h-3" />}
+                    Test
+                  </button>
+                </div>
+                {connStatus === "ok" && (
+                  <p className="flex items-center gap-1 text-[10px] text-evidence-green">
+                    <CheckCircle2 className="w-3 h-3" /> Connected — {ollamaModels.length} model{ollamaModels.length !== 1 ? "s" : ""} available
+                  </p>
+                )}
+                {connStatus === "error" && (
+                  <p className="flex items-center gap-1 text-[10px] text-destructive">
+                    <XCircle className="w-3 h-3" /> {connError}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <label className="data-label">Model Name</label>
-                <input
-                  type="text"
-                  value={settings.ollamaModel}
-                  onChange={(e) => onUpdate({ ollamaModel: e.target.value })}
-                  placeholder="llama3.2"
-                  className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
-                />
+                <label className="data-label">Model</label>
+                {ollamaModels.length > 0 ? (
+                  <select
+                    value={settings.ollamaModel}
+                    onChange={(e) => onUpdate({ ollamaModel: e.target.value })}
+                    className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono"
+                  >
+                    {ollamaModels.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={settings.ollamaModel}
+                    onChange={(e) => onUpdate({ ollamaModel: e.target.value })}
+                    placeholder="llama3.2"
+                    className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                  />
+                )}
                 <p className="text-[10px] text-muted-foreground">
-                  Use any model you've pulled locally — e.g. llama3.2, mistral, deepseek-r1, phi3, gemma2
+                  {ollamaModels.length > 0
+                    ? "Select from your locally available models"
+                    : "Click Test to discover models, or type a model name manually"}
                 </p>
               </div>
             </motion.div>
