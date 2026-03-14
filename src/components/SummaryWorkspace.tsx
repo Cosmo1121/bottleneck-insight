@@ -10,8 +10,14 @@ interface SummaryWorkspaceProps {
   isSaving: boolean;
 }
 
-const strengthOptions = ["", "extreme", "strong", "moderate", "weak", "none"];
-const priorityOptions = ["", "highest", "high", "medium", "low", "avoid"];
+const strengthOptions = ["", "structural_bottleneck", "moderate_constraint", "narrative_theme", "weak_thesis"];
+const strengthLabels: Record<string, string> = {
+  structural_bottleneck: "Structural Bottleneck",
+  moderate_constraint: "Moderate Constraint",
+  narrative_theme: "Narrative Theme",
+  weak_thesis: "Weak Thesis",
+};
+const priorityOptions = ["", "high", "medium", "low", "avoid"];
 
 const SummaryWorkspace = ({ analysis, onSave, isSaving }: SummaryWorkspaceProps) => {
   const [local, setLocal] = useState({
