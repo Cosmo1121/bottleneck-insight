@@ -1,4 +1,4 @@
-import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info } from "lucide-react";
+import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
@@ -26,6 +26,17 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
 
   const activeModel = lovableModels.find((m) => m.value === settings.model);
 
+  const providerLabel = () => {
+    if (settings.customProvider === "ollama") return "Ollama";
+    if (settings.customProvider) return settings.customProvider.charAt(0).toUpperCase() + settings.customProvider.slice(1);
+    return "Lovable AI";
+  };
+
+  const modelLabel = () => {
+    if (settings.customProvider === "ollama") return settings.ollamaModel;
+    return activeModel?.label ?? settings.model;
+  };
+
   return (
     <main className="flex-1 h-screen overflow-y-auto p-6 space-y-6">
       <div className="flex items-start justify-between">
@@ -36,7 +47,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">AI Configuration</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Choose your AI model and optionally bring your own API key.
+            Choose your AI model, bring your own key, or connect to a local Ollama instance.
           </p>
         </div>
         <button
@@ -48,77 +59,80 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
         </button>
       </div>
 
-      {/* Model Selector */}
-      <div className="panel">
-        <div className="panel-header">
-          <Cpu className="w-4 h-4 text-primary" />
-          <span className="data-label">AI Model</span>
-        </div>
-        <div className="p-4 space-y-3">
-          <p className="text-xs text-muted-foreground">
-            Select which model powers auto-fill and chat. All models are available via Lovable AI — no API key needed.
-          </p>
-          <div className="grid gap-2">
-            {lovableModels.map((model) => {
-              const isActive = settings.model === model.value;
-              return (
-                <motion.button
-                  key={model.value}
-                  onClick={() => onUpdate({ model: model.value })}
-                  className={`text-left p-3 rounded-sm border transition-colors ${
-                    isActive
-                      ? "bg-primary/10 border-primary/40 text-foreground"
-                      : "bg-accent border-panel-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
-                  }`}
-                  whileTap={{ scale: 0.995 }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-display font-semibold">{model.label}</span>
-                    {isActive && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-primary/20 text-primary">
-                        ACTIVE
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs mt-0.5 opacity-70">{model.desc}</p>
-                </motion.button>
-              );
-            })}
+      {/* Model Selector — only shown when not using Ollama */}
+      {settings.customProvider !== "ollama" && (
+        <div className="panel">
+          <div className="panel-header">
+            <Cpu className="w-4 h-4 text-primary" />
+            <span className="data-label">AI Model</span>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Select which model powers auto-fill and chat. All models are available via Lovable AI — no API key needed.
+            </p>
+            <div className="grid gap-2">
+              {lovableModels.map((model) => {
+                const isActive = settings.model === model.value;
+                return (
+                  <motion.button
+                    key={model.value}
+                    onClick={() => onUpdate({ model: model.value })}
+                    className={`text-left p-3 rounded-sm border transition-colors ${
+                      isActive
+                        ? "bg-primary/10 border-primary/40 text-foreground"
+                        : "bg-accent border-panel-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
+                    }`}
+                    whileTap={{ scale: 0.995 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-display font-semibold">{model.label}</span>
+                      {isActive && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-primary/20 text-primary">
+                          ACTIVE
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs mt-0.5 opacity-70">{model.desc}</p>
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* BYO Key */}
+      {/* Provider Selection */}
       <div className="panel">
         <div className="panel-header">
           <Key className="w-4 h-4 text-bottleneck-amber" />
-          <span className="data-label">Bring Your Own Key</span>
-          <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-bottleneck-amber/10 text-bottleneck-amber border border-bottleneck-amber/20">
-            OPTIONAL
-          </span>
+          <span className="data-label">AI Provider</span>
         </div>
         <div className="p-4 space-y-4">
           <div className="flex items-start gap-2 p-3 rounded-sm bg-accent border border-panel-border">
             <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               By default, all AI features use <span className="text-foreground font-medium">Lovable AI</span> with no setup required.
-              If you'd prefer to use your own OpenAI or Anthropic key, configure it below. Your key is stored locally in your browser only.
+              You can also use your own OpenAI/Anthropic key, or connect to a local <span className="text-foreground font-medium">Ollama</span> instance for fully private, open-source models.
             </p>
           </div>
 
           <div className="space-y-2">
             <label className="data-label">Provider</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {[
-                { value: "" as const, label: "Lovable AI (default)" },
+                { value: "" as const, label: "Lovable AI" },
                 { value: "openai" as const, label: "OpenAI" },
                 { value: "anthropic" as const, label: "Anthropic" },
+                { value: "ollama" as const, label: "Ollama (Local)" },
               ].map((opt) => {
                 const isActive = settings.customProvider === opt.value;
                 return (
                   <button
                     key={opt.value}
-                    onClick={() => onUpdate({ customProvider: opt.value, customApiKey: opt.value ? settings.customApiKey : "" })}
+                    onClick={() => onUpdate({
+                      customProvider: opt.value,
+                      customApiKey: opt.value && opt.value !== "ollama" ? settings.customApiKey : "",
+                    })}
                     className={`text-xs font-mono px-3 py-2 rounded-sm border transition-colors ${
                       isActive
                         ? "bg-primary/10 border-primary/40 text-primary"
@@ -132,7 +146,8 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
             </div>
           </div>
 
-          {settings.customProvider && (
+          {/* OpenAI / Anthropic key input */}
+          {(settings.customProvider === "openai" || settings.customProvider === "anthropic") && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-2">
               <label className="data-label">
                 {settings.customProvider === "openai" ? "OpenAI" : "Anthropic"} API Key
@@ -157,6 +172,48 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
               </p>
             </motion.div>
           )}
+
+          {/* Ollama config */}
+          {settings.customProvider === "ollama" && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
+              <div className="flex items-start gap-2 p-3 rounded-sm bg-evidence-green/5 border border-evidence-green/20">
+                <Server className="w-4 h-4 text-evidence-green shrink-0 mt-0.5" />
+                <div className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-foreground font-medium mb-1">Local Ollama Mode</p>
+                  <p>AI calls go directly from your browser to your local Ollama instance. Fully private — no data leaves your machine.</p>
+                  <p className="mt-1">Make sure Ollama is running with CORS enabled:</p>
+                  <code className="block mt-1 text-[10px] bg-background/50 px-2 py-1 rounded-sm text-evidence-green">
+                    OLLAMA_ORIGINS="*" ollama serve
+                  </code>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="data-label">Ollama URL</label>
+                <input
+                  type="text"
+                  value={settings.ollamaUrl}
+                  onChange={(e) => onUpdate({ ollamaUrl: e.target.value })}
+                  placeholder="http://localhost:11434"
+                  className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="data-label">Model Name</label>
+                <input
+                  type="text"
+                  value={settings.ollamaModel}
+                  onChange={(e) => onUpdate({ ollamaModel: e.target.value })}
+                  placeholder="llama3.2"
+                  className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Use any model you've pulled locally — e.g. llama3.2, mistral, deepseek-r1, phi3, gemma2
+                </p>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -169,20 +226,20 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           <div className="grid grid-cols-3 gap-4 text-xs">
             <div>
               <p className="data-label mb-1">Model</p>
-              <p className="font-mono text-foreground">{activeModel?.label ?? settings.model}</p>
+              <p className="font-mono text-foreground">{modelLabel()}</p>
             </div>
             <div>
               <p className="data-label mb-1">Provider</p>
-              <p className="font-mono text-foreground">
-                {settings.customProvider ? settings.customProvider.charAt(0).toUpperCase() + settings.customProvider.slice(1) : "Lovable AI"}
-              </p>
+              <p className="font-mono text-foreground">{providerLabel()}</p>
             </div>
             <div>
-              <p className="data-label mb-1">API Key</p>
-              <p className="font-mono text-foreground">
-                {settings.customProvider && settings.customApiKey
-                  ? `${settings.customApiKey.slice(0, 7)}...`
-                  : "Built-in"}
+              <p className="data-label mb-1">Endpoint</p>
+              <p className="font-mono text-foreground truncate">
+                {settings.customProvider === "ollama"
+                  ? settings.ollamaUrl
+                  : settings.customProvider && settings.customApiKey
+                    ? `${settings.customApiKey.slice(0, 7)}...`
+                    : "Built-in"}
               </p>
             </div>
           </div>
