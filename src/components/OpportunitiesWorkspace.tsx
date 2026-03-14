@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Target, Save, Loader2, Plus, X, TrendingUp } from "lucide-react";
+import { Target, Save, Loader2, Plus, X, TrendingUp, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import type { BottleneckAnalysis, Opportunities, RankedArea, PublicMarketExample } from "@/types/analysis";
 
@@ -18,9 +18,10 @@ interface OpportunitiesWorkspaceProps {
   analysis: BottleneckAnalysis;
   onSave: (updates: Partial<BottleneckAnalysis>) => void;
   isSaving: boolean;
+  onNavigate?: (toolId: string) => void;
 }
 
-const OpportunitiesWorkspace = ({ analysis, onSave, isSaving }: OpportunitiesWorkspaceProps) => {
+const OpportunitiesWorkspace = ({ analysis, onSave, isSaving, onNavigate }: OpportunitiesWorkspaceProps) => {
   const [opps, setOpps] = useState<Opportunities>(analysis.opportunities);
 
   useEffect(() => {
@@ -151,6 +152,22 @@ const OpportunitiesWorkspace = ({ analysis, onSave, isSaving }: OpportunitiesWor
             </motion.div>
           ))}
         </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => onNavigate?.("portfolio")}
+          className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+        >
+          Portfolio <ArrowRight className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => onNavigate?.("summary")}
+          className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-sm bg-evidence-green/10 text-evidence-green border border-evidence-green/20 hover:bg-evidence-green/20 transition-colors"
+        >
+          Summary <ArrowRight className="w-3 h-3" />
+        </button>
       </div>
     </main>
   );
