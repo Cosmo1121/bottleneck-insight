@@ -74,7 +74,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
               Select which model powers auto-fill and chat. All models are available out of the box — no API key needed.
             </p>
             <div className="grid gap-2">
-              {lovableModels.map((model) => {
+              {availableModels.map((model) => {
                 const isActive = settings.model === model.value;
                 return (
                   <motion.button
