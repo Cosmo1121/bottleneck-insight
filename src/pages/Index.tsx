@@ -39,6 +39,7 @@ const Index = () => {
   const createMutation = useCreateAnalysis();
   const updateMutation = useUpdateAnalysis();
   const deleteMutation = useDeleteAnalysis();
+  const { autofill, isAutofilling } = useAutofillAnalysis();
 
   const activeAnalysis = analyses.find((a) => a.id === activeAnalysisId) ?? null;
 
