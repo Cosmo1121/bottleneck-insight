@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import ChatPanel from "@/components/ChatPanel";
@@ -152,6 +153,7 @@ const Index = () => {
         onExportYaml={() => activeAnalysis && exportAsYaml(activeAnalysis)}
         onExportMarkdown={() => activeAnalysis && exportAsMarkdown(activeAnalysis)}
         onImportYaml={handleImportYaml}
+        onSignOut={signOut}
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
