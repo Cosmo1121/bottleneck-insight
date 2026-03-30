@@ -11,8 +11,8 @@ export interface AISettings {
 const STORAGE_KEY = "bottleneck-ai-settings";
 
 const defaults: AISettings = {
-  model: "google/gemini-3-flash-preview",
-  customProvider: "",
+  model: "",
+  customProvider: "ollama",
   customApiKey: "",
   ollamaUrl: "http://localhost:11434",
   ollamaModel: "llama3.2",

@@ -13,32 +13,35 @@ serve(async (req) => {
     const { messages, model, custom_provider, custom_api_key } = await req.json();
     if (!messages?.length) throw new Error("messages required");
 
-    let apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    let apiKey = "";
-    let selectedModel = model || "google/gemini-3-flash-preview";
+    // Require user-provided API credentials — no built-in fallback
+    if (!custom_provider || !custom_api_key) {
+      return new Response(JSON.stringify({ error: "No AI provider configured. Go to Settings and add your OpenAI or Anthropic API key, or use Ollama locally." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let apiUrl: string;
+    let apiKey = custom_api_key;
+    let selectedModel = model || "";
     let isAnthropic = false;
 
-    if (custom_provider && custom_api_key) {
-      if (custom_provider === "openai") {
-        apiUrl = "https://api.openai.com/v1/chat/completions";
-        selectedModel = model || "gpt-4o";
-      } else if (custom_provider === "anthropic") {
-        apiUrl = "https://api.anthropic.com/v1/messages";
-        selectedModel = model || "claude-sonnet-4-20250514";
-        isAnthropic = true;
-      }
-      apiKey = custom_api_key;
+    if (custom_provider === "openai") {
+      apiUrl = "https://api.openai.com/v1/chat/completions";
+      selectedModel = selectedModel || "gpt-4o";
+    } else if (custom_provider === "anthropic") {
+      apiUrl = "https://api.anthropic.com/v1/messages";
+      selectedModel = selectedModel || "claude-sonnet-4-20250514";
+      isAnthropic = true;
     } else {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-      apiKey = LOVABLE_API_KEY;
+      return new Response(JSON.stringify({ error: `Unsupported provider: ${custom_provider}. Use "openai", "anthropic", or Ollama locally.` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Fetch current analyses for context
     const { data: analyses } = await supabase
       .from("bottleneck_analyses")
       .select("id, theme, status, overall_confidence, scarcity_strength, investment_priority, thesis, primary_bottleneck")
@@ -76,7 +79,7 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
           parameters: {
             type: "object",
             properties: {
-              theme: { type: "string", description: "The bottleneck theme to analyze, e.g. 'Global Uranium Supply'" }
+              theme: { type: "string", description: "The bottleneck theme to analyze" }
             },
             required: ["theme"],
             additionalProperties: false,
@@ -137,7 +140,7 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
             { role: "system", content: systemPrompt },
             ...messages,
           ],
-          tools: isAnthropic ? undefined : tools,
+          tools,
           stream: true,
         };
 
@@ -153,9 +156,9 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ error: "Invalid API key. Check your key in Settings." }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const text = await response.text();
@@ -165,14 +168,8 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
       });
     }
 
-    // We need to intercept tool calls. Read the full SSE stream, detect tool calls, execute them, then re-stream.
-    // For simplicity, we do a non-streaming first pass to check for tool calls.
-    // If no tool calls, we stream the response directly.
-    
-    // Clone isn't available, so we consume and check
     const fullBody = await response.text();
     
-    // Parse SSE to check for tool calls
     let toolCalls: any[] = [];
     let contentParts: string[] = [];
     let finishReason = "";
@@ -197,7 +194,6 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
       } catch {}
     }
 
-    // If there are tool calls, execute them and make a follow-up call
     if (toolCalls.length > 0 && finishReason === "tool_calls") {
       const toolResults: any[] = [];
       
@@ -234,7 +230,6 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
         });
       }
 
-      // Build assistant message with tool calls
       const assistantMsg: any = { role: "assistant", content: contentParts.join("") || null };
       assistantMsg.tool_calls = toolCalls.map(tc => ({
         id: tc.id,
@@ -242,7 +237,6 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
         function: { name: tc.function.name, arguments: tc.function.arguments },
       }));
 
-      // Follow-up call with tool results, streaming
       const followUp = await fetch(apiUrl, {
         method: "POST",
         headers: aiHeaders,
@@ -269,7 +263,6 @@ Be concise, data-driven, and opinionated. Use markdown formatting.`;
       });
     }
 
-    // No tool calls - re-emit the content as SSE
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
