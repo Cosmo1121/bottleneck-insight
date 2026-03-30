@@ -131,28 +131,21 @@ serve(async (req) => {
     const { theme, model, custom_provider, custom_api_key } = await req.json();
     if (!theme) throw new Error("theme is required");
 
-    let apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    let apiKey = "";
-    let selectedModel = model || "google/gemini-3-flash-preview";
-
-    if (custom_provider && custom_api_key) {
-      if (custom_provider === "openai") {
-        apiUrl = "https://api.openai.com/v1/chat/completions";
-        selectedModel = model || "gpt-4o";
-      } else if (custom_provider === "anthropic") {
-        apiUrl = "https://api.anthropic.com/v1/messages";
-        // Anthropic handled separately below
-      }
-      apiKey = custom_api_key;
-    } else {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-      apiKey = LOVABLE_API_KEY;
+    // Require user-provided API credentials — no built-in fallback
+    if (!custom_provider || !custom_api_key) {
+      return new Response(JSON.stringify({ error: "No AI provider configured. Go to Settings and add your OpenAI or Anthropic API key, or use Ollama locally." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    let apiUrl: string;
+    let apiKey = custom_api_key;
+    let selectedModel = model || "";
 
     let response: Response;
 
-    if (custom_provider === "anthropic" && custom_api_key) {
+    if (custom_provider === "anthropic") {
+      selectedModel = selectedModel || "claude-sonnet-4-20250514";
       response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -161,7 +154,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: selectedModel,
           max_tokens: 8192,
           system: SYSTEM_PROMPT,
           messages: [
@@ -170,8 +163,9 @@ serve(async (req) => {
           temperature: 0.3,
         }),
       });
-    } else {
-      response = await fetch(apiUrl, {
+    } else if (custom_provider === "openai") {
+      selectedModel = selectedModel || "gpt-4o";
+      response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -187,6 +181,10 @@ serve(async (req) => {
           temperature: 0.3,
         }),
       });
+    } else {
+      return new Response(JSON.stringify({ error: `Unsupported provider: ${custom_provider}. Use "openai", "anthropic", or Ollama locally.` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (!response.ok) {
@@ -195,13 +193,13 @@ serve(async (req) => {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ error: "Invalid API key. Check your key in Settings." }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
+      console.error("AI provider error:", response.status, text);
       return new Response(JSON.stringify({ error: "AI service temporarily unavailable" }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -210,14 +208,13 @@ serve(async (req) => {
     const data = await response.json();
     let content: string;
 
-    if (custom_provider === "anthropic" && custom_api_key) {
+    if (custom_provider === "anthropic") {
       content = data.content?.[0]?.text;
     } else {
       content = data.choices?.[0]?.message?.content;
     }
     if (!content) throw new Error("No content returned from AI");
 
-    // Strip markdown fences if present
     const cleaned = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     const analysis = JSON.parse(cleaned);
 

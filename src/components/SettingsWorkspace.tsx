@@ -1,19 +1,7 @@
 import { Settings, RotateCcw, Eye, EyeOff, Cpu, Key, Info, Server, Plug, Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { AISettings } from "@/hooks/useAISettings";
-
-const availableModels = [
-  { value: "google/gemini-3-flash-preview", label: "Gemini 3 Flash (Fast)", desc: "Default — balanced speed & capability" },
-  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", desc: "Good multimodal, lower cost" },
-  { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite", desc: "Fastest, cheapest — simple tasks" },
-  { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro", desc: "Top-tier reasoning & context" },
-  { value: "google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", desc: "Latest next-gen reasoning" },
-  { value: "openai/gpt-5", label: "GPT-5", desc: "Powerful all-rounder, higher cost" },
-  { value: "openai/gpt-5-mini", label: "GPT-5 Mini", desc: "Strong performance, lower cost" },
-  { value: "openai/gpt-5-nano", label: "GPT-5 Nano", desc: "Speed & cost optimized" },
-  { value: "openai/gpt-5.2", label: "GPT-5.2", desc: "Latest, enhanced reasoning" },
-];
 
 interface SettingsWorkspaceProps {
   settings: AISettings;
@@ -27,17 +15,18 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
   const [connError, setConnError] = useState("");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
 
-  const activeModel = availableModels.find((m) => m.value === settings.model);
-
   const providerLabel = () => {
-    if (settings.customProvider === "ollama") return "Ollama";
-    if (settings.customProvider) return settings.customProvider.charAt(0).toUpperCase() + settings.customProvider.slice(1);
-    return "Built-in AI";
+    if (settings.customProvider === "ollama") return "Ollama (Local)";
+    if (settings.customProvider === "openai") return "OpenAI";
+    if (settings.customProvider === "anthropic") return "Anthropic";
+    return "Not configured";
   };
 
   const modelLabel = () => {
     if (settings.customProvider === "ollama") return settings.ollamaModel;
-    return activeModel?.label ?? settings.model;
+    if (settings.customProvider === "openai") return settings.model || "gpt-4o";
+    if (settings.customProvider === "anthropic") return settings.model || "claude-sonnet-4-20250514";
+    return "None";
   };
 
   return (
@@ -50,7 +39,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">AI Configuration</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Choose your AI model, bring your own key, or connect to a local Ollama instance.
+            Connect to a local Ollama instance or bring your own OpenAI / Anthropic API key.
           </p>
         </div>
         <button
@@ -62,48 +51,6 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
         </button>
       </div>
 
-      {/* Model Selector — only shown when not using Ollama */}
-      {settings.customProvider !== "ollama" && (
-        <div className="panel">
-          <div className="panel-header">
-            <Cpu className="w-4 h-4 text-primary" />
-            <span className="data-label">AI Model</span>
-          </div>
-          <div className="p-4 space-y-3">
-            <p className="text-xs text-muted-foreground">
-              Select which model powers auto-fill and chat. All models are available out of the box — no API key needed.
-            </p>
-            <div className="grid gap-2">
-              {availableModels.map((model) => {
-                const isActive = settings.model === model.value;
-                return (
-                  <motion.button
-                    key={model.value}
-                    onClick={() => onUpdate({ model: model.value })}
-                    className={`text-left p-3 rounded-sm border transition-colors ${
-                      isActive
-                        ? "bg-primary/10 border-primary/40 text-foreground"
-                        : "bg-accent border-panel-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
-                    }`}
-                    whileTap={{ scale: 0.995 }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-display font-semibold">{model.label}</span>
-                      {isActive && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-primary/20 text-primary">
-                          ACTIVE
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs mt-0.5 opacity-70">{model.desc}</p>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Provider Selection */}
       <div className="panel">
         <div className="panel-header">
@@ -114,8 +61,8 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
           <div className="flex items-start gap-2 p-3 rounded-sm bg-accent border border-panel-border">
             <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              By default, all AI features use the <span className="text-foreground font-medium">built-in AI</span> with no setup required.
-              You can also use your own OpenAI/Anthropic key, or connect to a local <span className="text-foreground font-medium">Ollama</span> instance for fully private, open-source models.
+              <span className="text-foreground font-medium">Ollama (local)</span> is the default — fully private, no API key needed.
+              You can also use your own <span className="text-foreground font-medium">OpenAI</span> or <span className="text-foreground font-medium">Anthropic</span> API key for cloud models.
             </p>
           </div>
 
@@ -123,10 +70,9 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
             <label className="data-label">Provider</label>
             <div className="flex flex-wrap gap-2">
               {[
-                { value: "" as const, label: "Built-in AI" },
+                { value: "ollama" as const, label: "Ollama (Local)" },
                 { value: "openai" as const, label: "OpenAI" },
                 { value: "anthropic" as const, label: "Anthropic" },
-                { value: "ollama" as const, label: "Ollama (Local)" },
               ].map((opt) => {
                 const isActive = settings.customProvider === opt.value;
                 return (
@@ -134,7 +80,8 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                     key={opt.value}
                     onClick={() => onUpdate({
                       customProvider: opt.value,
-                      customApiKey: opt.value && opt.value !== "ollama" ? settings.customApiKey : "",
+                      customApiKey: opt.value !== "ollama" ? settings.customApiKey : "",
+                      model: "",
                     })}
                     className={`text-xs font-mono px-3 py-2 rounded-sm border transition-colors ${
                       isActive
@@ -151,28 +98,44 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
 
           {/* OpenAI / Anthropic key input */}
           {(settings.customProvider === "openai" || settings.customProvider === "anthropic") && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-2">
-              <label className="data-label">
-                {settings.customProvider === "openai" ? "OpenAI" : "Anthropic"} API Key
-              </label>
-              <div className="relative">
-                <input
-                  type={showKey ? "text" : "password"}
-                  value={settings.customApiKey}
-                  onChange={(e) => onUpdate({ customApiKey: e.target.value })}
-                  placeholder={settings.customProvider === "openai" ? "sk-..." : "sk-ant-..."}
-                  className="w-full bg-accent text-foreground text-xs px-3 py-2 pr-10 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
-                />
-                <button
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
+              <div className="space-y-2">
+                <label className="data-label">
+                  {settings.customProvider === "openai" ? "OpenAI" : "Anthropic"} API Key
+                </label>
+                <div className="relative">
+                  <input
+                    type={showKey ? "text" : "password"}
+                    value={settings.customApiKey}
+                    onChange={(e) => onUpdate({ customApiKey: e.target.value })}
+                    placeholder={settings.customProvider === "openai" ? "sk-..." : "sk-ant-..."}
+                    className="w-full bg-accent text-foreground text-xs px-3 py-2 pr-10 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                  />
+                  <button
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Stored in localStorage only. Sent to backend for AI calls — never stored server-side.
+                </p>
               </div>
-              <p className="text-[10px] text-muted-foreground">
-                Stored in localStorage. Sent to backend functions for AI calls — not stored server-side.
-              </p>
+
+              <div className="space-y-2">
+                <label className="data-label">Model (optional)</label>
+                <input
+                  type="text"
+                  value={settings.model}
+                  onChange={(e) => onUpdate({ model: e.target.value })}
+                  placeholder={settings.customProvider === "openai" ? "gpt-4o" : "claude-sonnet-4-20250514"}
+                  className="w-full bg-accent text-foreground text-xs px-3 py-2 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Leave blank for the default model, or specify any model your API key supports.
+                </p>
+              </div>
             </motion.div>
           )}
 
@@ -211,7 +174,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                         const contentType = resp.headers.get("content-type") || "";
                         if (!contentType.includes("application/json")) {
                           throw new Error(
-                            "Received HTML instead of JSON. If using the Lovable preview, Ollama on localhost is unreachable — run the app locally (npm run dev) to connect."
+                            "Received HTML instead of JSON. If using a hosted preview, Ollama on localhost is unreachable — run the app locally (npm run dev) to connect."
                           );
                         }
                         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -226,7 +189,7 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
                         setConnStatus("error");
                         const msg = err?.message || "Cannot reach Ollama";
                         if (msg.includes("Unexpected token") || msg.includes("<!doctype")) {
-                          setConnError("Received HTML instead of JSON. If using the Lovable preview, Ollama on localhost is unreachable — run the app locally to connect.");
+                          setConnError("Received HTML instead of JSON. If using a hosted preview, Ollama on localhost is unreachable — run the app locally to connect.");
                         } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
                           setConnError("Cannot reach Ollama. Ensure it's running with: OLLAMA_ORIGINS=\"*\" ollama serve");
                         } else {
@@ -302,13 +265,13 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
               <p className="font-mono text-foreground">{providerLabel()}</p>
             </div>
             <div>
-              <p className="data-label mb-1">Endpoint</p>
-              <p className="font-mono text-foreground truncate">
+              <p className="data-label mb-1">Status</p>
+              <p className="font-mono text-foreground">
                 {settings.customProvider === "ollama"
-                  ? settings.ollamaUrl
-                  : settings.customProvider && settings.customApiKey
-                    ? `${settings.customApiKey.slice(0, 7)}...`
-                    : "Built-in"}
+                  ? "Local"
+                  : settings.customApiKey
+                    ? "Key configured"
+                    : "⚠️ No API key"}
               </p>
             </div>
           </div>
