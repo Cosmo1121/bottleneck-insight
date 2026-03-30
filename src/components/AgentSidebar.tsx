@@ -54,13 +54,12 @@ interface AgentSidebarProps {
   onExportYaml?: () => void;
   onExportMarkdown?: () => void;
   onImportYaml?: (content: string) => void;
-  onSignOut?: () => void;
 }
 
 const AgentSidebar = ({
   activeToolId, onToolSelect,
   analyses, activeAnalysisId, onSelectAnalysis, onCreateAnalysis, onDeleteAnalysis, isCreating,
-  onExportYaml, onExportMarkdown, onImportYaml, onSignOut,
+  onExportYaml, onExportMarkdown, onImportYaml,
 }: AgentSidebarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -135,15 +134,6 @@ const AgentSidebar = ({
           <Settings className="w-3.5 h-3.5 shrink-0" />
           <span>Settings</span>
         </button>
-        {onSignOut && (
-          <button
-            onClick={onSignOut}
-            className="nav-item w-full text-left text-xs py-1.5 text-destructive hover:text-destructive"
-          >
-            <LogOut className="w-3.5 h-3.5 shrink-0" />
-            <span>Sign Out</span>
-          </button>
-        )}
       </div>
     </aside>
   );
