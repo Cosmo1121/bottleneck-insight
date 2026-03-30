@@ -168,6 +168,9 @@ serve(async (req) => {
       });
     }
 
+    // Fetch fresh research context (recent news/data feeds) for the theme
+    const researchContext = await fetchResearchContext(theme);
+
     let apiUrl: string;
     let apiKey = custom_api_key;
     let selectedModel = model || "";
