@@ -122,6 +122,8 @@ Return ONLY valid JSON (no markdown, no backticks) with this exact structure:
   "final_assessment": "..."
 }
 
+IMPORTANT: If the user message includes a "RECENT NEWS & DATA" section with live headlines, you MUST incorporate any relevant headlines as evidence_items in the scarcity_evidence section. Use source_type "news", the headline as the summary, the source name in brackets as source_name, and the publication date. Set confidence to 0.6-0.8 for news headlines. Only include headlines that are genuinely relevant to the theme's scarcity dynamics.
+
 Be specific, data-driven, and opinionated. Use real company names and tickers. Fill every field.`;
 
 /** Fetch recent research context for a theme from the research-context function */

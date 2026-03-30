@@ -11,14 +11,27 @@ export interface ResearchContextStats {
   fetchedAt: string;
 }
 
+interface RawHeadline {
+  title: string;
+  source: string;
+  date: string;
+  link: string;
+}
+
+interface ResearchResult {
+  context: string;
+  stats: ResearchContextStats | null;
+  headlines: RawHeadline[];
+}
+
 /** Fetch recent news/data context for a theme from the research-context edge function */
-async function fetchResearchContext(theme: string): Promise<{ context: string; stats: ResearchContextStats | null }> {
+async function fetchResearchContext(theme: string): Promise<ResearchResult> {
   try {
     const { data, error } = await supabase.functions.invoke("research-context", {
       body: { theme },
     });
-    if (error || !data) return { context: "", stats: null };
-    const headlines = [
+    if (error || !data) return { context: "", stats: null, headlines: [] };
+    const headlines: RawHeadline[] = [
       ...(data.relevant_headlines || []),
       ...(data.recent_market_headlines || []),
     ];
@@ -27,21 +40,43 @@ async function fetchResearchContext(theme: string): Promise<{ context: string; s
       feedsChecked: data.feeds_checked || 0,
       fetchedAt: data.fetched_at || new Date().toISOString(),
     };
-    if (headlines.length === 0) return { context: "", stats };
-    const lines = headlines.map((h: any) =>
+    if (headlines.length === 0) return { context: "", stats, headlines: [] };
+    const lines = headlines.map((h) =>
       `- [${h.source}] ${h.title} (${h.date || "recent"})`
     );
     return {
       context: `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`,
       stats,
+      headlines,
     };
   } catch {
-    return { context: "", stats: null };
+    return { context: "", stats: null, headlines: [] };
   }
 }
 
-async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null }> {
-  const { context: researchContext, stats } = await fetchResearchContext(theme);
+/** Convert raw headlines into structured evidence items */
+function headlinesToEvidenceItems(headlines: RawHeadline[]): any[] {
+  return headlines.map((h) => {
+    let dateStr = "";
+    try {
+      const d = new Date(h.date);
+      dateStr = d.toISOString().slice(0, 10);
+    } catch {
+      dateStr = new Date().toISOString().slice(0, 10);
+    }
+    return {
+      source_name: h.source,
+      source_type: "news",
+      date: dateStr,
+      signal: "Live data feed",
+      summary: h.title,
+      confidence: 0.6,
+    };
+  });
+}
+
+async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null; headlines: RawHeadline[] }> {
+  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme);
 
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
@@ -67,7 +102,7 @@ async function callOllamaAutofill(theme: string, settings: AISettings): Promise<
   if (!content) throw new Error("No content returned from Ollama");
 
   const cleaned = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  return { result: JSON.parse(cleaned), stats };
+  return { result: JSON.parse(cleaned), stats, headlines };
 }
 
 export const useAutofillAnalysis = () => {
@@ -84,15 +119,18 @@ export const useAutofillAnalysis = () => {
     try {
       let data: any;
       let stats: ResearchContextStats | null = null;
+      let headlines: RawHeadline[] = [];
 
       if (aiSettings?.customProvider === "ollama") {
         const ollamaResult = await callOllamaAutofill(theme, aiSettings);
         data = ollamaResult.result;
         stats = ollamaResult.stats;
+        headlines = ollamaResult.headlines;
       } else {
-        // For cloud providers, fetch research context stats separately (the edge function fetches its own)
-        const { stats: preStats } = await fetchResearchContext(theme);
-        stats = preStats;
+        // For cloud providers, fetch research context to get headlines (the edge function also fetches its own)
+        const research = await fetchResearchContext(theme);
+        stats = research.stats;
+        headlines = research.headlines;
 
         const body: Record<string, any> = { theme };
         if (aiSettings?.model) body.model = aiSettings.model;
@@ -114,11 +152,20 @@ export const useAutofillAnalysis = () => {
         data.overall_confidence = data.overall_confidence / 100;
       }
 
+      // Merge live headline evidence items with AI-generated ones (dedup by title)
+      const aiEvidenceItems = data.scarcity_evidence?.evidence_items ?? [];
+      const headlineEvidence = headlinesToEvidenceItems(headlines);
+      const existingSummaries = new Set(aiEvidenceItems.map((e: any) => e.summary?.toLowerCase()));
+      const newHeadlineItems = headlineEvidence.filter(
+        (h) => !existingSummaries.has(h.summary.toLowerCase())
+      );
+      const mergedEvidence = [...aiEvidenceItems, ...newHeadlineItems];
+
       const updates: Partial<BottleneckAnalysis> = {
         ...data,
         scarcity_evidence: {
           ...data.scarcity_evidence,
-          evidence_items: data.scarcity_evidence?.evidence_items ?? [],
+          evidence_items: mergedEvidence,
         },
         status: "active",
       };
