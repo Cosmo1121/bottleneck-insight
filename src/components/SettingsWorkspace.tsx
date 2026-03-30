@@ -9,6 +9,86 @@ interface SettingsWorkspaceProps {
   onReset: () => void;
 }
 
+const CustomRssPanel = ({ feeds, onUpdate }: { feeds: CustomRssFeed[]; onUpdate: (feeds: CustomRssFeed[]) => void }) => {
+  const [newName, setNewName] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+
+  const handleAdd = () => {
+    const name = newName.trim();
+    const url = newUrl.trim();
+    if (!url) return;
+    try { new URL(url); } catch { return; }
+    onUpdate([...feeds, { name: name || new URL(url).hostname, url }]);
+    setNewName("");
+    setNewUrl("");
+  };
+
+  const handleRemove = (index: number) => {
+    onUpdate(feeds.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="panel">
+      <div className="panel-header">
+        <Rss className="w-4 h-4 text-evidence-green" />
+        <span className="data-label">Custom Data Feeds</span>
+      </div>
+      <div className="p-4 space-y-3">
+        <div className="flex items-start gap-2 p-3 rounded-sm bg-accent border border-panel-border">
+          <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Add RSS feed URLs for niche research domains. These feeds are checked during AI auto-fill to inject recent headlines as evidence context.
+          </p>
+        </div>
+
+        {feeds.length > 0 && (
+          <div className="space-y-1.5">
+            {feeds.map((feed, i) => (
+              <div key={i} className="flex items-center gap-2 group">
+                <Rss className="w-3 h-3 text-muted-foreground shrink-0" />
+                <span className="text-xs font-mono text-foreground truncate flex-1">{feed.name}</span>
+                <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">{feed.url}</span>
+                <button
+                  onClick={() => handleRemove(i)}
+                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Feed name (optional)"
+            className="w-32 bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+          />
+          <input
+            type="url"
+            value={newUrl}
+            onChange={(e) => setNewUrl(e.target.value)}
+            placeholder="https://example.com/feed.xml"
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            className="flex-1 bg-accent text-foreground text-xs px-2 py-1.5 rounded-sm border border-panel-border font-mono placeholder:text-muted-foreground"
+          />
+          <button
+            onClick={handleAdd}
+            disabled={!newUrl.trim()}
+            className="flex items-center gap-1 px-2 py-1.5 text-xs font-mono rounded-sm border border-panel-border bg-accent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30 transition-colors disabled:opacity-30"
+          >
+            <Plus className="w-3 h-3" />
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspaceProps) => {
   const [showKey, setShowKey] = useState(false);
   const [connStatus, setConnStatus] = useState<"idle" | "testing" | "ok" | "error">("idle");
