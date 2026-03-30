@@ -124,6 +124,36 @@ Return ONLY valid JSON (no markdown, no backticks) with this exact structure:
 
 Be specific, data-driven, and opinionated. Use real company names and tickers. Fill every field.`;
 
+/** Fetch recent research context for a theme from the research-context function */
+async function fetchResearchContext(theme: string): Promise<string> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resp = await fetch(`${supabaseUrl}/functions/v1/research-context`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ theme }),
+    });
+    if (!resp.ok) return "";
+    const data = await resp.json();
+    const headlines = [
+      ...(data.relevant_headlines || []),
+      ...(data.recent_market_headlines || []),
+    ];
+    if (headlines.length === 0) return "";
+    const lines = headlines.map((h: any) =>
+      `- [${h.source}] ${h.title} (${h.date || "recent"})`
+    );
+    return `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`;
+  } catch (e) {
+    console.warn("Research context fetch failed (non-fatal):", e);
+    return "";
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -137,6 +167,9 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Fetch fresh research context (recent news/data feeds) for the theme
+    const researchContext = await fetchResearchContext(theme);
 
     let apiUrl: string;
     let apiKey = custom_api_key;
@@ -153,12 +186,12 @@ serve(async (req) => {
           "anthropic-version": "2023-06-01",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+      body: JSON.stringify({
           model: selectedModel,
           max_tokens: 8192,
           system: SYSTEM_PROMPT,
           messages: [
-            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
+            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"${researchContext}` },
           ],
           temperature: 0.3,
         }),
@@ -171,12 +204,12 @@ serve(async (req) => {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+      body: JSON.stringify({
           model: selectedModel,
           max_tokens: 8192,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
+            { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"${researchContext}` },
           ],
           temperature: 0.3,
         }),

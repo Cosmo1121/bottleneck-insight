@@ -5,7 +5,31 @@ import type { BottleneckAnalysis } from "@/types/analysis";
 import type { AISettings } from "@/hooks/useAISettings";
 import { AUTOFILL_SYSTEM_PROMPT } from "@/lib/prompts";
 
+/** Fetch recent news/data context for a theme from the research-context edge function */
+async function fetchResearchContext(theme: string): Promise<string> {
+  try {
+    const { data, error } = await supabase.functions.invoke("research-context", {
+      body: { theme },
+    });
+    if (error || !data) return "";
+    const headlines = [
+      ...(data.relevant_headlines || []),
+      ...(data.recent_market_headlines || []),
+    ];
+    if (headlines.length === 0) return "";
+    const lines = headlines.map((h: any) =>
+      `- [${h.source}] ${h.title} (${h.date || "recent"})`
+    );
+    return `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`;
+  } catch {
+    return "";
+  }
+}
+
 async function callOllamaAutofill(theme: string, settings: AISettings): Promise<any> {
+  // Fetch fresh context in parallel with nothing else for now
+  const researchContext = await fetchResearchContext(theme);
+
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -13,7 +37,7 @@ async function callOllamaAutofill(theme: string, settings: AISettings): Promise<
       model: settings.ollamaModel,
       messages: [
         { role: "system", content: AUTOFILL_SYSTEM_PROMPT },
-        { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"` },
+        { role: "user", content: `Analyze this bottleneck investing theme: "${theme}"${researchContext}` },
       ],
       stream: false,
       options: { temperature: 0.3 },
