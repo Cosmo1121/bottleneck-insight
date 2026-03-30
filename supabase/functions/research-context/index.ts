@@ -150,6 +150,7 @@ serve(async (req) => {
         source,
       })),
       feeds_checked: RSS_FEEDS.length,
+      feeds_responded: feedsSucceeded,
       total_articles_scanned: allItems.length,
     };
 
