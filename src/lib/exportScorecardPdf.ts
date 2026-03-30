@@ -96,7 +96,8 @@ export function exportScorecardPdf(analysis: BottleneckAnalysis) {
 
   // === Score & Confidence row ===
   const scores = analysis.scores;
-  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const scoreValues = Object.values(scores) as number[];
+  const total = scoreValues.reduce((a, b) => a + b, 0);
   const classLabel = getClassification(total);
 
   // Score box
