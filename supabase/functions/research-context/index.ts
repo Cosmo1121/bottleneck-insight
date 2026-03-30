@@ -157,7 +157,7 @@ serve(async (req) => {
         date: pubDate,
         source,
       })),
-      feeds_checked: RSS_FEEDS.length,
+      feeds_checked: allFeeds.length,
       feeds_responded: feedsSucceeded,
       total_articles_scanned: allItems.length,
     };
