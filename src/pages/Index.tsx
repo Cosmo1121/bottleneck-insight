@@ -42,6 +42,7 @@ const Index = () => {
   const [localRationale, setLocalRationale] = useState<HeatmapRationale>(defaultRationale);
   const [showMemo, setShowMemo] = useState(false);
 
+  const { signOut } = useAuth();
   const { data: analyses = [], isLoading } = useAnalyses();
   const createMutation = useCreateAnalysis();
   const updateMutation = useUpdateAnalysis();
