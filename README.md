@@ -31,6 +31,9 @@ Each step is guided by a synthesis block that tells you what the data says befor
 ### AI-Assisted Analysis (Ollama by Default)
 One-click auto-fill generates a complete bottleneck analysis from a theme. **Ollama is the default AI provider** — run entirely against local open-source models with zero cloud dependency and full privacy. After every fill, an **AI Analyst Memo** surfaces the reasoning, fragile assumptions, and potential false friends — so the AI feels accountable, not magical.
 
+### Live Data Feeds & Web Research
+AI analyses are automatically enriched with **real-time context** from financial news and commodity data feeds (Reuters, CNBC, EIA, Mining.com, and more). Before the AI generates an analysis, the system fetches recent headlines relevant to your theme and injects them into the prompt — so the model reasons over current market conditions, not just its training data. Works with both local Ollama and cloud providers.
+
 ### Bring Your Own API Key
 Prefer cloud models? Add your own **OpenAI** or **Anthropic** API key in Settings and specify any model your key supports. No built-in credits — you control your own usage and costs.
 
