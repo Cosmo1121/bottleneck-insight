@@ -118,4 +118,4 @@ All AI calls are routed through **your** chosen provider — Ollama locally, or 
 
 ## License
 
-MIT
+MIT — Copyright (c) 2026 Drew Alan Hicks
