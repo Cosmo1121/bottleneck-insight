@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Gauge, TrendingUp, TrendingDown, AlertTriangle, Shield, Zap, Clock, DollarSign, Scale, Users, Lock, BarChart3 } from "lucide-react";
+import { Gauge, TrendingUp, TrendingDown, AlertTriangle, Shield, Zap, Clock, DollarSign, Scale, Users, Lock, BarChart3, Download } from "lucide-react";
+import { toast } from "sonner";
 import type { BottleneckAnalysis, HeatmapScores, ThesisBreakersStructured } from "@/types/analysis";
+import { exportScorecardPdf } from "@/lib/exportScorecardPdf";
 
 interface Props {
   analysis: BottleneckAnalysis;
@@ -113,10 +115,19 @@ const VisualScorecardWorkspace = ({ analysis }: Props) => {
 
   return (
     <main className="flex-1 h-screen overflow-y-auto bg-background">
-      <div className="panel-header sticky top-0 z-10 bg-background/95 backdrop-blur">
-        <Gauge className="w-4 h-4 text-primary" />
-        <span className="data-label">Visual Scorecard</span>
-        <span className="text-xs text-muted-foreground ml-2 font-mono">{analysis.theme}</span>
+      <div className="panel-header sticky top-0 z-10 bg-background/95 backdrop-blur flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Gauge className="w-4 h-4 text-primary" />
+          <span className="data-label">Visual Scorecard</span>
+          <span className="text-xs text-muted-foreground ml-2 font-mono">{analysis.theme}</span>
+        </div>
+        <button
+          onClick={() => { exportScorecardPdf(analysis); toast.success("PDF downloaded"); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary/10 hover:bg-primary/20 text-primary rounded-sm transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" />
+          Export PDF
+        </button>
       </div>
 
       <div className="p-6 space-y-6 max-w-6xl mx-auto">
