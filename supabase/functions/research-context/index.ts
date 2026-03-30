@@ -6,14 +6,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Free, public RSS feeds for financial / commodity / macro data
+// Free, public RSS feeds organized by category
 const RSS_FEEDS = [
+  // Macro / General Financial
   { name: "Reuters Business", url: "https://feeds.reuters.com/reuters/businessNews" },
   { name: "CNBC Economy", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258" },
-  { name: "FT Commodities", url: "https://www.ft.com/commodities?format=rss" },
-  { name: "EIA Today in Energy", url: "https://www.eia.gov/todayinenergy/rss.xml" },
-  { name: "Mining.com", url: "https://www.mining.com/feed/" },
   { name: "Reuters Commodities", url: "https://feeds.reuters.com/reuters/commoditiesNews" },
+  // Energy
+  { name: "EIA Today in Energy", url: "https://www.eia.gov/todayinenergy/rss.xml" },
+  { name: "Oilprice.com", url: "https://oilprice.com/rss/main" },
+  // Nuclear / Uranium
+  { name: "World Nuclear News", url: "https://www.world-nuclear-news.org/rss" },
+  { name: "Uranium Insider", url: "https://www.uraniuminvestingnews.com/feed" },
+  // Mining / Metals / Rare Earths
+  { name: "Mining.com", url: "https://www.mining.com/feed/" },
+  { name: "Lithium Investing News", url: "https://www.lithiuminvestingnews.com/feed" },
+  { name: "Rare Earth Investing News", url: "https://www.rareearthinvestingnews.com/feed" },
+  { name: "Copper Investing News", url: "https://www.copperinvestingnews.com/feed" },
+  { name: "Nickel Investing News", url: "https://www.nickelinvestingnews.com/feed" },
+  // Semiconductors / Tech Supply Chain
+  { name: "SemiAnalysis", url: "https://www.semianalysis.com/feed" },
+  { name: "Tom's Hardware", url: "https://www.tomshardware.com/feeds/all" },
+  // Agriculture / Soft Commodities
+  { name: "AgWeb", url: "https://www.agweb.com/rss/news" },
 ];
 
 interface FeedItem {
@@ -73,15 +88,21 @@ serve(async (req) => {
       .filter((w: string) => w.length > 2);
 
     // Fetch all RSS feeds in parallel (with timeout)
+    let feedsSucceeded = 0;
     const feedPromises = RSS_FEEDS.map(async (feed) => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        const resp = await fetch(feed.url, { signal: controller.signal });
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const resp = await fetch(feed.url, {
+          signal: controller.signal,
+          headers: { "User-Agent": "ScarcityScout/1.0 (RSS Reader)" },
+        });
         clearTimeout(timeout);
         if (!resp.ok) return [];
         const xml = await resp.text();
-        return parseRSS(xml, feed.name);
+        const items = parseRSS(xml, feed.name);
+        if (items.length > 0) feedsSucceeded++;
+        return items;
       } catch {
         return [];
       }
@@ -129,6 +150,7 @@ serve(async (req) => {
         source,
       })),
       feeds_checked: RSS_FEEDS.length,
+      feeds_responded: feedsSucceeded,
       total_articles_scanned: allItems.length,
     };
 
