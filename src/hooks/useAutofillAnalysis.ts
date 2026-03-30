@@ -78,7 +78,7 @@ function headlinesToEvidenceItems(headlines: RawHeadline[]): any[] {
 }
 
 async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null; headlines: RawHeadline[] }> {
-  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme);
+  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme, settings.customRssFeeds);
 
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
