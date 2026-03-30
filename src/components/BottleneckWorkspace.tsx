@@ -98,19 +98,35 @@ const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofil
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">{analysis.theme}</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onAutofill}
-            disabled={isAutofilling || isSaving}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-accent text-foreground border border-primary/40 rounded-sm hover:bg-primary/10 disabled:opacity-50 transition-colors"
-          >
-            {isAutofilling ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-primary" />}
-            {isAutofilling ? "Generating..." : "AI Auto-fill"}
-          </button>
-          <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50">
-            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-            Save
-          </button>
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onAutofill}
+              disabled={isAutofilling || isSaving}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-accent text-foreground border border-primary/40 rounded-sm hover:bg-primary/10 disabled:opacity-50 transition-colors"
+            >
+              {isAutofilling ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-primary" />}
+              {isAutofilling ? "Generating..." : "AI Auto-fill"}
+            </button>
+            <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono bg-primary text-primary-foreground rounded-sm hover:opacity-90 disabled:opacity-50">
+              {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              Save
+            </button>
+          </div>
+          {researchStats && (
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
+              <Newspaper className="w-3 h-3 text-evidence-green" />
+              <span>
+                {researchStats.headlineCount > 0
+                  ? `${researchStats.headlineCount} live headlines from ${researchStats.feedsChecked} feeds`
+                  : `${researchStats.feedsChecked} feeds checked · no matching headlines`}
+              </span>
+              <span className="text-muted-foreground/50">·</span>
+              <span className="text-muted-foreground/60">
+                {new Date(researchStats.fetchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
