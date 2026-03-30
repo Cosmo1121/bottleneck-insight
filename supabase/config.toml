@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.mcp]
 verify_jwt = false
+
+[functions.openapi]
+verify_jwt = false
+
+[functions.webhooks]
+verify_jwt = false

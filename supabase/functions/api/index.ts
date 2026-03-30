@@ -26,6 +26,47 @@ serve(async (req) => {
   const analysisId = pathParts[0] || null;
 
   try {
+    // BATCH operations
+    if (req.method === "POST" && pathParts[0] === "batch") {
+      const { operations } = await req.json();
+      if (!Array.isArray(operations) || operations.length === 0) {
+        return jsonResponse({ error: "operations[] is required" }, 400);
+      }
+      if (operations.length > 50) {
+        return jsonResponse({ error: "Max 50 operations per batch" }, 400);
+      }
+      const results = [];
+      for (let i = 0; i < operations.length; i++) {
+        const op = operations[i];
+        try {
+          if (op.action === "create") {
+            if (!op.data?.theme) throw new Error("theme is required for create");
+            const { data, error } = await supabase.from("bottleneck_analyses").insert(op.data).select("id, theme").single();
+            if (error) throw error;
+            results.push({ index: i, success: true, id: data.id, action: "create" });
+          } else if (op.action === "update") {
+            if (!op.id) throw new Error("id is required for update");
+            const updates = { ...op.data };
+            delete updates.id;
+            delete updates.created_at;
+            const { data, error } = await supabase.from("bottleneck_analyses").update(updates).eq("id", op.id).select("id").single();
+            if (error) throw error;
+            results.push({ index: i, success: true, id: data.id, action: "update" });
+          } else if (op.action === "delete") {
+            if (!op.id) throw new Error("id is required for delete");
+            const { error } = await supabase.from("bottleneck_analyses").delete().eq("id", op.id);
+            if (error) throw error;
+            results.push({ index: i, success: true, id: op.id, action: "delete" });
+          } else {
+            results.push({ index: i, success: false, error: `Unknown action: ${op.action}` });
+          }
+        } catch (err) {
+          results.push({ index: i, success: false, error: err instanceof Error ? err.message : "Unknown error" });
+        }
+      }
+      return jsonResponse({ results });
+    }
+
     // LIST all analyses
     if (req.method === "GET" && !analysisId) {
       const { data, error } = await supabase
