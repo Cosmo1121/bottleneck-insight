@@ -69,6 +69,7 @@ Scarcity Scout is designed to be fully operable by AI agents — no UI required.
 | **OpenAPI Spec** | `/functions/v1/openapi` | Machine-readable API description for auto-discovery of endpoints, schemas, and operations. |
 | **Batch Operations** | `POST /functions/v1/api/batch` | Up to 50 create/update/delete operations in a single call. |
 | **Webhooks** | `/functions/v1/webhooks` | Subscribe to `analysis.created`, `analysis.updated`, `analysis.deleted` events with conditional filters (e.g., "confidence < 50%") and optional HMAC signature verification. |
+| **Research Context** | `/functions/v1/research-context` | Fetches recent news and data feed headlines relevant to a theme from 6+ financial RSS sources. Used automatically during auto-fill to ground AI in current market data. |
 
 ---
 
