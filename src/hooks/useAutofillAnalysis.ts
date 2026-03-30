@@ -11,14 +11,27 @@ export interface ResearchContextStats {
   fetchedAt: string;
 }
 
+interface RawHeadline {
+  title: string;
+  source: string;
+  date: string;
+  link: string;
+}
+
+interface ResearchResult {
+  context: string;
+  stats: ResearchContextStats | null;
+  headlines: RawHeadline[];
+}
+
 /** Fetch recent news/data context for a theme from the research-context edge function */
-async function fetchResearchContext(theme: string): Promise<{ context: string; stats: ResearchContextStats | null }> {
+async function fetchResearchContext(theme: string): Promise<ResearchResult> {
   try {
     const { data, error } = await supabase.functions.invoke("research-context", {
       body: { theme },
     });
-    if (error || !data) return { context: "", stats: null };
-    const headlines = [
+    if (error || !data) return { context: "", stats: null, headlines: [] };
+    const headlines: RawHeadline[] = [
       ...(data.relevant_headlines || []),
       ...(data.recent_market_headlines || []),
     ];
@@ -27,17 +40,39 @@ async function fetchResearchContext(theme: string): Promise<{ context: string; s
       feedsChecked: data.feeds_checked || 0,
       fetchedAt: data.fetched_at || new Date().toISOString(),
     };
-    if (headlines.length === 0) return { context: "", stats };
-    const lines = headlines.map((h: any) =>
+    if (headlines.length === 0) return { context: "", stats, headlines: [] };
+    const lines = headlines.map((h) =>
       `- [${h.source}] ${h.title} (${h.date || "recent"})`
     );
     return {
       context: `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`,
       stats,
+      headlines,
     };
   } catch {
-    return { context: "", stats: null };
+    return { context: "", stats: null, headlines: [] };
   }
+}
+
+/** Convert raw headlines into structured evidence items */
+function headlinesToEvidenceItems(headlines: RawHeadline[]): any[] {
+  return headlines.map((h) => {
+    let dateStr = "";
+    try {
+      const d = new Date(h.date);
+      dateStr = d.toISOString().slice(0, 10);
+    } catch {
+      dateStr = new Date().toISOString().slice(0, 10);
+    }
+    return {
+      source_name: h.source,
+      source_type: "news",
+      date: dateStr,
+      signal: "Live data feed",
+      summary: h.title,
+      confidence: 0.6,
+    };
+  });
 }
 
 async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null }> {
