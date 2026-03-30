@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import AgentSidebar from "@/components/AgentSidebar";
 import ChatPanel from "@/components/ChatPanel";
@@ -41,6 +42,7 @@ const Index = () => {
   const [localRationale, setLocalRationale] = useState<HeatmapRationale>(defaultRationale);
   const [showMemo, setShowMemo] = useState(false);
 
+  const { signOut } = useAuth();
   const { data: analyses = [], isLoading } = useAnalyses();
   const createMutation = useCreateAnalysis();
   const updateMutation = useUpdateAnalysis();
@@ -96,9 +98,11 @@ const Index = () => {
     try {
       const parsed = parseYamlImport(content);
       const { theme, ...rest } = parsed;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("You must be signed in to import");
       const { data, error } = await supabase
         .from("bottleneck_analyses")
-        .insert({ theme, ...rest } as any)
+        .insert({ theme, ...rest, owner_id: user.id } as any)
         .select("id")
         .single();
       if (error) throw error;
@@ -152,6 +156,7 @@ const Index = () => {
         onExportYaml={() => activeAnalysis && exportAsYaml(activeAnalysis)}
         onExportMarkdown={() => activeAnalysis && exportAsMarkdown(activeAnalysis)}
         onImportYaml={handleImportYaml}
+        onSignOut={signOut}
       />
       {renderWorkspace()}
       <ScarcityScorecard scores={activeAnalysis?.scores ?? localScores} theme={activeAnalysis?.theme} />
