@@ -4,6 +4,8 @@
 
 Scarcity Scout is a structured investment research workbench for identifying, scoring, and stress-testing scarcity-driven investment theses — the kind of asymmetric setups where supply constraints meet surging demand and the market hasn't caught up yet.
 
+![Scarcity Scout Dashboard](public/product-shot.png)
+
 ---
 
 ## Why Scarcity Scout?
