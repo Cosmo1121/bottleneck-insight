@@ -84,11 +84,9 @@ export const useCreateAnalysis = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (theme: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("You must be signed in to create an analysis");
       const { data, error } = await supabase
         .from("bottleneck_analyses")
-        .insert({ theme, owner_id: user.id })
+        .insert({ theme })
         .select()
         .single();
       if (error) throw error;
