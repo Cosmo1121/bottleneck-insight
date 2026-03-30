@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.png" alt="Scarcity Scout" width="200" />
+</p>
+
 # Scarcity Scout
 
 **Find the bottleneck. Own the scarcity. Build the thesis.**

@@ -2,6 +2,7 @@ import { Search, BarChart3, GitBranch, Briefcase, Activity, Zap, TreeDeciduous, 
 import { useRef } from "react";
 import AnalysisSelector from "./AnalysisSelector";
 import type { BottleneckAnalysis } from "@/types/analysis";
+import logo from "@/assets/logo.png";
 
 const toolGroups = [
   {
@@ -78,8 +79,8 @@ const AgentSidebar = ({
   return (
     <aside className="w-48 shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col h-screen">
       <div className="px-3 py-3 border-b border-sidebar-border flex items-center gap-2">
-        <Zap className="w-4 h-4 text-primary" />
-        <span className="font-display font-bold text-xs tracking-wide text-foreground">BOTTLENECK</span>
+        <img src={logo} alt="Scarcity Scout" className="w-6 h-6" />
+        <span className="font-display font-bold text-xs tracking-wide text-foreground">SCARCITY SCOUT</span>
       </div>
 
       <AnalysisSelector
