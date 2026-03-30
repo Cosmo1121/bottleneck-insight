@@ -75,8 +75,8 @@ function headlinesToEvidenceItems(headlines: RawHeadline[]): any[] {
   });
 }
 
-async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null }> {
-  const { context: researchContext, stats } = await fetchResearchContext(theme);
+async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null; headlines: RawHeadline[] }> {
+  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme);
 
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
@@ -102,7 +102,7 @@ async function callOllamaAutofill(theme: string, settings: AISettings): Promise<
   if (!content) throw new Error("No content returned from Ollama");
 
   const cleaned = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  return { result: JSON.parse(cleaned), stats };
+  return { result: JSON.parse(cleaned), stats, headlines };
 }
 
 export const useAutofillAnalysis = () => {
@@ -119,15 +119,18 @@ export const useAutofillAnalysis = () => {
     try {
       let data: any;
       let stats: ResearchContextStats | null = null;
+      let headlines: RawHeadline[] = [];
 
       if (aiSettings?.customProvider === "ollama") {
         const ollamaResult = await callOllamaAutofill(theme, aiSettings);
         data = ollamaResult.result;
         stats = ollamaResult.stats;
+        headlines = ollamaResult.headlines;
       } else {
-        // For cloud providers, fetch research context stats separately (the edge function fetches its own)
-        const { stats: preStats } = await fetchResearchContext(theme);
-        stats = preStats;
+        // For cloud providers, fetch research context to get headlines (the edge function also fetches its own)
+        const research = await fetchResearchContext(theme);
+        stats = research.stats;
+        headlines = research.headlines;
 
         const body: Record<string, any> = { theme };
         if (aiSettings?.model) body.model = aiSettings.model;
@@ -149,11 +152,20 @@ export const useAutofillAnalysis = () => {
         data.overall_confidence = data.overall_confidence / 100;
       }
 
+      // Merge live headline evidence items with AI-generated ones (dedup by title)
+      const aiEvidenceItems = data.scarcity_evidence?.evidence_items ?? [];
+      const headlineEvidence = headlinesToEvidenceItems(headlines);
+      const existingSummaries = new Set(aiEvidenceItems.map((e: any) => e.summary?.toLowerCase()));
+      const newHeadlineItems = headlineEvidence.filter(
+        (h) => !existingSummaries.has(h.summary.toLowerCase())
+      );
+      const mergedEvidence = [...aiEvidenceItems, ...newHeadlineItems];
+
       const updates: Partial<BottleneckAnalysis> = {
         ...data,
         scarcity_evidence: {
           ...data.scarcity_evidence,
-          evidence_items: data.scarcity_evidence?.evidence_items ?? [],
+          evidence_items: mergedEvidence,
         },
         status: "active",
       };
