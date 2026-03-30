@@ -182,6 +182,36 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_subscriptions: {
+        Row: {
+          active: boolean
+          conditions: Json | null
+          created_at: string
+          events: string[]
+          id: string
+          secret: string | null
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          conditions?: Json | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret?: string | null
+          url: string
+        }
+        Update: {
+          active?: boolean
+          conditions?: Json | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
