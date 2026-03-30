@@ -25,10 +25,12 @@ interface ResearchResult {
 }
 
 /** Fetch recent news/data context for a theme from the research-context edge function */
-async function fetchResearchContext(theme: string): Promise<ResearchResult> {
+async function fetchResearchContext(theme: string, customFeeds?: { name: string; url: string }[]): Promise<ResearchResult> {
   try {
+    const body: Record<string, any> = { theme };
+    if (customFeeds?.length) body.custom_feeds = customFeeds;
     const { data, error } = await supabase.functions.invoke("research-context", {
-      body: { theme },
+      body,
     });
     if (error || !data) return { context: "", stats: null, headlines: [] };
     const headlines: RawHeadline[] = [
