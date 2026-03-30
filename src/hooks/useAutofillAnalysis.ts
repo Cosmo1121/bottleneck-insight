@@ -72,6 +72,7 @@ async function callOllamaAutofill(theme: string, settings: AISettings): Promise<
 
 export const useAutofillAnalysis = () => {
   const [isAutofilling, setIsAutofilling] = useState(false);
+  const [lastResearchStats, setLastResearchStats] = useState<ResearchContextStats | null>(null);
 
   const autofill = async (
     theme: string,
@@ -79,12 +80,20 @@ export const useAutofillAnalysis = () => {
     aiSettings?: AISettings
   ) => {
     setIsAutofilling(true);
+    setLastResearchStats(null);
     try {
       let data: any;
+      let stats: ResearchContextStats | null = null;
 
       if (aiSettings?.customProvider === "ollama") {
-        data = await callOllamaAutofill(theme, aiSettings);
+        const ollamaResult = await callOllamaAutofill(theme, aiSettings);
+        data = ollamaResult.result;
+        stats = ollamaResult.stats;
       } else {
+        // For cloud providers, fetch research context stats separately (the edge function fetches its own)
+        const { stats: preStats } = await fetchResearchContext(theme);
+        stats = preStats;
+
         const body: Record<string, any> = { theme };
         if (aiSettings?.model) body.model = aiSettings.model;
         if (aiSettings?.customProvider && aiSettings?.customApiKey) {
@@ -97,6 +106,8 @@ export const useAutofillAnalysis = () => {
         if (fnData?.error) throw new Error(fnData.error);
         data = fnData;
       }
+
+      setLastResearchStats(stats);
 
       // Normalize AI confidence from 0-100 scale to 0-1
       if (data.overall_confidence != null && data.overall_confidence > 1) {
@@ -113,7 +124,11 @@ export const useAutofillAnalysis = () => {
       };
 
       onSave(updates);
-      toast.success("AI auto-fill complete — review and save your analysis");
+
+      const statsMsg = stats && stats.headlineCount > 0
+        ? ` • ${stats.headlineCount} live headlines injected from ${stats.feedsChecked} feeds`
+        : " • No live data feeds available";
+      toast.success(`AI auto-fill complete${statsMsg}`);
     } catch (err: any) {
       console.error("Autofill error:", err);
       const msg = err?.message || "Failed to auto-fill analysis";
@@ -123,5 +138,5 @@ export const useAutofillAnalysis = () => {
     }
   };
 
-  return { autofill, isAutofilling };
+  return { autofill, isAutofilling, lastResearchStats };
 };
