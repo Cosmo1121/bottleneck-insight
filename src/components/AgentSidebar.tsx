@@ -38,6 +38,7 @@ const toolGroups = [
     tools: [
       { id: "monitor", label: "Monitor", icon: Activity },
       { id: "summary", label: "Summary", icon: FileCheck },
+      { id: "visual-scorecard", label: "Visual Scorecard", icon: Zap },
     ],
   },
 ];

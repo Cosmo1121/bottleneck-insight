@@ -16,6 +16,7 @@ import PortfolioWorkspace from "@/components/PortfolioWorkspace";
 import ThesisBreakersWorkspace from "@/components/ThesisBreakersWorkspace";
 import MonitorWorkspace from "@/components/MonitorWorkspace";
 import SummaryWorkspace from "@/components/SummaryWorkspace";
+import VisualScorecardWorkspace from "@/components/VisualScorecardWorkspace";
 import SettingsWorkspace from "@/components/SettingsWorkspace";
 import ScarcityScorecard from "@/components/ScarcityScorecard";
 import { useAnalyses, useCreateAnalysis, useUpdateAnalysis, useDeleteAnalysis } from "@/hooks/useAnalyses";
@@ -133,6 +134,7 @@ const Index = () => {
       case "thesis-breakers": return <ThesisBreakersWorkspace {...shared} />;
       case "monitor": return <MonitorWorkspace {...shared} />;
       case "summary": return <SummaryWorkspace {...shared} />;
+      case "visual-scorecard": return <VisualScorecardWorkspace analysis={activeAnalysis} />;
       case "settings": return <SettingsWorkspace settings={aiSettings} onUpdate={updateAISettings} onReset={resetAISettings} />;
       default: return <BottleneckWorkspace {...shared} />;
     }
