@@ -5,30 +5,43 @@ import type { BottleneckAnalysis } from "@/types/analysis";
 import type { AISettings } from "@/hooks/useAISettings";
 import { AUTOFILL_SYSTEM_PROMPT } from "@/lib/prompts";
 
+export interface ResearchContextStats {
+  headlineCount: number;
+  feedsChecked: number;
+  fetchedAt: string;
+}
+
 /** Fetch recent news/data context for a theme from the research-context edge function */
-async function fetchResearchContext(theme: string): Promise<string> {
+async function fetchResearchContext(theme: string): Promise<{ context: string; stats: ResearchContextStats | null }> {
   try {
     const { data, error } = await supabase.functions.invoke("research-context", {
       body: { theme },
     });
-    if (error || !data) return "";
+    if (error || !data) return { context: "", stats: null };
     const headlines = [
       ...(data.relevant_headlines || []),
       ...(data.recent_market_headlines || []),
     ];
-    if (headlines.length === 0) return "";
+    const stats: ResearchContextStats = {
+      headlineCount: headlines.length,
+      feedsChecked: data.feeds_checked || 0,
+      fetchedAt: data.fetched_at || new Date().toISOString(),
+    };
+    if (headlines.length === 0) return { context: "", stats };
     const lines = headlines.map((h: any) =>
       `- [${h.source}] ${h.title} (${h.date || "recent"})`
     );
-    return `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`;
+    return {
+      context: `\n\nRECENT NEWS & DATA (fetched ${data.fetched_at}):\n${lines.join("\n")}`,
+      stats,
+    };
   } catch {
-    return "";
+    return { context: "", stats: null };
   }
 }
 
-async function callOllamaAutofill(theme: string, settings: AISettings): Promise<any> {
-  // Fetch fresh context in parallel with nothing else for now
-  const researchContext = await fetchResearchContext(theme);
+async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null }> {
+  const { context: researchContext, stats } = await fetchResearchContext(theme);
 
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
@@ -54,7 +67,7 @@ async function callOllamaAutofill(theme: string, settings: AISettings): Promise<
   if (!content) throw new Error("No content returned from Ollama");
 
   const cleaned = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  return JSON.parse(cleaned);
+  return { result: JSON.parse(cleaned), stats };
 }
 
 export const useAutofillAnalysis = () => {
