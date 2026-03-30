@@ -130,7 +130,7 @@ export const useAutofillAnalysis = () => {
         headlines = ollamaResult.headlines;
       } else {
         // For cloud providers, fetch research context to get headlines (the edge function also fetches its own)
-        const research = await fetchResearchContext(theme);
+        const research = await fetchResearchContext(theme, aiSettings?.customRssFeeds);
         stats = research.stats;
         headlines = research.headlines;
 
