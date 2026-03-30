@@ -1,5 +1,6 @@
-import { AlertTriangle, Save, Loader2, Tag, Sparkles, FileText } from "lucide-react";
+import { AlertTriangle, Save, Loader2, Tag, Sparkles, FileText, Newspaper } from "lucide-react";
 import type { BottleneckAnalysis } from "@/types/analysis";
+import type { ResearchContextStats } from "@/hooks/useAutofillAnalysis";
 import { useState, useEffect } from "react";
 import EditableTagList from "./EditableTagList";
 import ThesisSynthesis from "./ThesisSynthesis";
@@ -13,6 +14,7 @@ interface BottleneckWorkspaceProps {
   isAutofilling?: boolean;
   showMemo?: boolean;
   onDismissMemo?: () => void;
+  researchStats?: ResearchContextStats | null;
 }
 
 const statusOptions = ["draft", "active", "monitoring", "closed"];
@@ -20,7 +22,7 @@ const stageOptions = ["", "hypothesis", "evidence-gathering", "confirmed", "moni
 const riskOptions = ["", "low", "medium", "high", "very-high"];
 const subjectTypes = ["", "macro_theme", "sector", "industry", "commodity", "geography", "technology", "policy"];
 
-const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling, showMemo, onDismissMemo }: BottleneckWorkspaceProps) => {
+const BottleneckWorkspace = ({ analysis, onSave, isSaving, onAutofill, isAutofilling, showMemo, onDismissMemo, researchStats }: BottleneckWorkspaceProps) => {
   const [local, setLocal] = useState({
     thesis: analysis.thesis,
     worldview_assumption: analysis.worldview_assumption,
