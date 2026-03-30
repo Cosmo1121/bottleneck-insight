@@ -98,9 +98,11 @@ const Index = () => {
     try {
       const parsed = parseYamlImport(content);
       const { theme, ...rest } = parsed;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("You must be signed in to import");
       const { data, error } = await supabase
         .from("bottleneck_analyses")
-        .insert({ theme, ...rest } as any)
+        .insert({ theme, ...rest, owner_id: user.id } as any)
         .select("id")
         .single();
       if (error) throw error;
