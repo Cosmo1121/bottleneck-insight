@@ -88,15 +88,21 @@ serve(async (req) => {
       .filter((w: string) => w.length > 2);
 
     // Fetch all RSS feeds in parallel (with timeout)
+    let feedsSucceeded = 0;
     const feedPromises = RSS_FEEDS.map(async (feed) => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        const resp = await fetch(feed.url, { signal: controller.signal });
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const resp = await fetch(feed.url, {
+          signal: controller.signal,
+          headers: { "User-Agent": "ScarcityScout/1.0 (RSS Reader)" },
+        });
         clearTimeout(timeout);
         if (!resp.ok) return [];
         const xml = await resp.text();
-        return parseRSS(xml, feed.name);
+        const items = parseRSS(xml, feed.name);
+        if (items.length > 0) feedsSucceeded++;
+        return items;
       } catch {
         return [];
       }
