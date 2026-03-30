@@ -249,6 +249,9 @@ const SettingsWorkspace = ({ settings, onUpdate, onReset }: SettingsWorkspacePro
         </div>
       </div>
 
+      {/* Custom RSS Feeds */}
+      <CustomRssPanel feeds={settings.customRssFeeds || []} onUpdate={(feeds) => onUpdate({ customRssFeeds: feeds })} />
+
       {/* Current Config Summary */}
       <div className="panel">
         <div className="panel-header">
