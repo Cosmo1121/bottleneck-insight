@@ -28,8 +28,11 @@ Each step is guided by a synthesis block that tells you what the data says befor
 
 ## Key Features
 
-### AI-Assisted Analysis
-One-click auto-fill generates a complete bottleneck analysis from a theme, powered by configurable AI models. After every fill, an **AI Analyst Memo** surfaces the reasoning, fragile assumptions, and potential false friends — so the AI feels accountable, not magical.
+### AI-Assisted Analysis (Ollama by Default)
+One-click auto-fill generates a complete bottleneck analysis from a theme. **Ollama is the default AI provider** — run entirely against local open-source models with zero cloud dependency and full privacy. After every fill, an **AI Analyst Memo** surfaces the reasoning, fragile assumptions, and potential false friends — so the AI feels accountable, not magical.
+
+### Bring Your Own API Key
+Prefer cloud models? Add your own **OpenAI** or **Anthropic** API key in Settings and specify any model your key supports. No built-in credits — you control your own usage and costs.
 
 ### Scarcity Heatmap
 Nine-factor scoring system (scarcity severity, supply response speed, pricing power, barriers to entry, and more) with hover-over rubrics explaining exactly what a 1, 3, or 5 means for each factor. No ambiguous numbers.
@@ -46,34 +49,61 @@ Structured checklist of what would kill the thesis (substitution risk, capital f
 ### Value Chain Mapper
 Map entities across six layers — demand creators, bottleneck owners, infrastructure, picks & shovels, operators, and integrators — to find where value actually accrues.
 
-### Ollama Integration
-Run entirely against local open-source models via Ollama. Connection test, model picker, and configurable endpoint — no API keys required if you prefer local inference.
-
 ### YAML & Markdown Export
 Full round-trip import/export for portability, version control, and team sharing.
 
 ### Chat Interface
-Conversational AI assistant with full context of your analyses for ad-hoc questions, brainstorming, and deep dives.
+Conversational AI assistant with full context of your analyses for ad-hoc questions, brainstorming, and deep dives. Works with Ollama or your own cloud API key.
 
 ---
 
 ## Getting Started
+
+### 1. Install & Run
 
 ```sh
 npm install
 npm run dev
 ```
 
-Create an account, pick a theme (e.g., "US nuclear power restart," "global copper smelting capacity," "GLP-1 API bottleneck"), and let the framework guide your research.
+### 2. Set Up Ollama (Recommended)
+
+Scarcity Scout defaults to a local [Ollama](https://ollama.com) instance for AI features. Install Ollama, pull a model, and start the server with CORS enabled:
+
+```sh
+# Install Ollama: https://ollama.com/download
+ollama pull llama3.2
+OLLAMA_ORIGINS="*" ollama serve
+```
+
+Then open the app, go to **Settings**, click **Test** to verify the connection, and you're ready to auto-fill analyses.
+
+### 3. Or Use a Cloud Provider
+
+If you prefer cloud models, go to **Settings → AI Provider**, select **OpenAI** or **Anthropic**, and paste your API key. No other setup needed.
+
+---
+
+## Self-Hosting
+
+Scarcity Scout uses Supabase for data persistence. To self-host:
+
+1. Create a [Supabase](https://supabase.com) project
+2. Run the migrations in `supabase/migrations/` against your database
+3. Set environment variables:
+   - `VITE_SUPABASE_URL` — your Supabase project URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` — your Supabase anon/public key
+4. Deploy the edge functions in `supabase/functions/` to your project (only needed if using cloud AI providers via the chat or auto-fill features)
+
+All AI calls are routed through **your** chosen provider — Ollama locally, or your own OpenAI/Anthropic key. There are no shared AI credits.
 
 ---
 
 ## Tech Stack
 
 - **Frontend:** React · TypeScript · Vite · Tailwind CSS · shadcn/ui · Framer Motion
-- **Backend:** Supabase (Postgres, Edge Functions, Row-Level Security)
-- **AI:** Configurable provider — cloud models via gateway or local Ollama
-- **Auth:** Email/password with per-user data ownership
+- **Backend:** Supabase (Postgres, Edge Functions)
+- **AI:** Ollama (default, local) · OpenAI / Anthropic (BYO key)
 
 ---
 
@@ -88,4 +118,4 @@ Create an account, pick a theme (e.g., "US nuclear power restart," "global coppe
 
 ## License
 
-Private. All rights reserved.
+MIT
