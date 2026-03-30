@@ -41,7 +41,6 @@ export type Database = {
           monitoring: Json
           opportunities: Json
           overall_confidence: number | null
-          owner_id: string | null
           portfolio: Json
           primary_bottleneck: string | null
           public_markets_only: boolean | null
@@ -97,7 +96,6 @@ export type Database = {
           monitoring?: Json
           opportunities?: Json
           overall_confidence?: number | null
-          owner_id?: string | null
           portfolio?: Json
           primary_bottleneck?: string | null
           public_markets_only?: boolean | null
@@ -153,7 +151,6 @@ export type Database = {
           monitoring?: Json
           opportunities?: Json
           overall_confidence?: number | null
-          owner_id?: string | null
           portfolio?: Json
           primary_bottleneck?: string | null
           public_markets_only?: boolean | null
