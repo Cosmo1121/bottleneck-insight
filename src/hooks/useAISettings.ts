@@ -1,11 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 
+export interface CustomRssFeed {
+  name: string;
+  url: string;
+}
+
 export interface AISettings {
   model: string;
   customProvider: "" | "openai" | "anthropic" | "ollama";
   customApiKey: string;
   ollamaUrl: string;
   ollamaModel: string;
+  customRssFeeds: CustomRssFeed[];
 }
 
 const STORAGE_KEY = "bottleneck-ai-settings";
@@ -16,6 +22,7 @@ const defaults: AISettings = {
   customApiKey: "",
   ollamaUrl: "http://localhost:11434",
   ollamaModel: "llama3.2",
+  customRssFeeds: [],
 };
 
 export const useAISettings = () => {

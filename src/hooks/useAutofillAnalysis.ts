@@ -25,10 +25,12 @@ interface ResearchResult {
 }
 
 /** Fetch recent news/data context for a theme from the research-context edge function */
-async function fetchResearchContext(theme: string): Promise<ResearchResult> {
+async function fetchResearchContext(theme: string, customFeeds?: { name: string; url: string }[]): Promise<ResearchResult> {
   try {
+    const body: Record<string, any> = { theme };
+    if (customFeeds?.length) body.custom_feeds = customFeeds;
     const { data, error } = await supabase.functions.invoke("research-context", {
-      body: { theme },
+      body,
     });
     if (error || !data) return { context: "", stats: null, headlines: [] };
     const headlines: RawHeadline[] = [
@@ -76,7 +78,7 @@ function headlinesToEvidenceItems(headlines: RawHeadline[]): any[] {
 }
 
 async function callOllamaAutofill(theme: string, settings: AISettings): Promise<{ result: any; stats: ResearchContextStats | null; headlines: RawHeadline[] }> {
-  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme);
+  const { context: researchContext, stats, headlines } = await fetchResearchContext(theme, settings.customRssFeeds);
 
   const resp = await fetch(`${settings.ollamaUrl}/api/chat`, {
     method: "POST",
@@ -128,7 +130,7 @@ export const useAutofillAnalysis = () => {
         headlines = ollamaResult.headlines;
       } else {
         // For cloud providers, fetch research context to get headlines (the edge function also fetches its own)
-        const research = await fetchResearchContext(theme);
+        const research = await fetchResearchContext(theme, aiSettings?.customRssFeeds);
         stats = research.stats;
         headlines = research.headlines;
 

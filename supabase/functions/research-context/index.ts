@@ -72,13 +72,21 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { theme } = await req.json();
+    const { theme, custom_feeds } = await req.json();
     if (!theme) {
       return new Response(JSON.stringify({ error: "theme is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Merge built-in feeds with user-provided custom feeds
+    const customFeedList = Array.isArray(custom_feeds)
+      ? custom_feeds
+          .filter((f: any) => f?.url && typeof f.url === "string")
+          .map((f: any) => ({ name: String(f.name || new URL(f.url).hostname), url: String(f.url) }))
+      : [];
+    const allFeeds = [...RSS_FEEDS, ...customFeedList];
 
     // Build keyword list from theme
     const keywords = theme
@@ -89,7 +97,7 @@ serve(async (req) => {
 
     // Fetch all RSS feeds in parallel (with timeout)
     let feedsSucceeded = 0;
-    const feedPromises = RSS_FEEDS.map(async (feed) => {
+    const feedPromises = allFeeds.map(async (feed) => {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -149,7 +157,7 @@ serve(async (req) => {
         date: pubDate,
         source,
       })),
-      feeds_checked: RSS_FEEDS.length,
+      feeds_checked: allFeeds.length,
       feeds_responded: feedsSucceeded,
       total_articles_scanned: allItems.length,
     };
