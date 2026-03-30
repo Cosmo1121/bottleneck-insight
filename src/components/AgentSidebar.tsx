@@ -94,7 +94,7 @@ const AgentSidebar = ({
       <nav className="flex-1 p-1.5 space-y-0.5 overflow-y-auto">
         {toolGroups.map((group) => (
           <div key={group.label}>
-            <p className="data-label px-2 py-1.5 text-[10px] mt-1">{group.label}</p>
+            <p className="px-2 py-1.5 text-[11px] font-display font-semibold uppercase tracking-wider text-primary mt-1">{group.label}</p>
             {group.tools.map((tool) => {
               const Icon = tool.icon;
               const isActive = activeToolId === tool.id;

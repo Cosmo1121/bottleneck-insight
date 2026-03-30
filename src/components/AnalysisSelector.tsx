@@ -25,7 +25,7 @@ const AnalysisSelector = ({ analyses, activeId, onSelect, onCreate, onDelete, is
   return (
     <div className="border-b border-sidebar-border">
       <div className="px-4 py-2 flex items-center justify-between">
-        <span className="data-label">Analyses</span>
+        <span className="text-[11px] font-display font-semibold uppercase tracking-wider text-primary">Analyses</span>
         <button
           onClick={() => setIsAdding(!isAdding)}
           className="w-6 h-6 flex items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
