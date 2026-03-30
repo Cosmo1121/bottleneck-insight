@@ -6,14 +6,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Free, public RSS feeds for financial / commodity / macro data
+// Free, public RSS feeds organized by category
 const RSS_FEEDS = [
+  // Macro / General Financial
   { name: "Reuters Business", url: "https://feeds.reuters.com/reuters/businessNews" },
   { name: "CNBC Economy", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258" },
-  { name: "FT Commodities", url: "https://www.ft.com/commodities?format=rss" },
-  { name: "EIA Today in Energy", url: "https://www.eia.gov/todayinenergy/rss.xml" },
-  { name: "Mining.com", url: "https://www.mining.com/feed/" },
   { name: "Reuters Commodities", url: "https://feeds.reuters.com/reuters/commoditiesNews" },
+  // Energy
+  { name: "EIA Today in Energy", url: "https://www.eia.gov/todayinenergy/rss.xml" },
+  { name: "Oilprice.com", url: "https://oilprice.com/rss/main" },
+  // Nuclear / Uranium
+  { name: "World Nuclear News", url: "https://www.world-nuclear-news.org/rss" },
+  { name: "Uranium Insider", url: "https://www.uraniuminvestingnews.com/feed" },
+  // Mining / Metals / Rare Earths
+  { name: "Mining.com", url: "https://www.mining.com/feed/" },
+  { name: "Lithium Investing News", url: "https://www.lithiuminvestingnews.com/feed" },
+  { name: "Rare Earth Investing News", url: "https://www.rareearthinvestingnews.com/feed" },
+  { name: "Copper Investing News", url: "https://www.copperinvestingnews.com/feed" },
+  { name: "Nickel Investing News", url: "https://www.nickelinvestingnews.com/feed" },
+  // Semiconductors / Tech Supply Chain
+  { name: "SemiAnalysis", url: "https://www.semianalysis.com/feed" },
+  { name: "Tom's Hardware", url: "https://www.tomshardware.com/feeds/all" },
+  // Agriculture / Soft Commodities
+  { name: "AgWeb", url: "https://www.agweb.com/rss/news" },
 ];
 
 interface FeedItem {
