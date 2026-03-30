@@ -55,6 +55,18 @@ Full round-trip import/export for portability, version control, and team sharing
 ### Chat Interface
 Conversational AI assistant with full context of your analyses for ad-hoc questions, brainstorming, and deep dives. Works with Ollama or your own cloud API key.
 
+### 🤖 Agent-Friendly Architecture
+
+Scarcity Scout is designed to be fully operable by AI agents — no UI required.
+
+| Capability | Endpoint | Description |
+|---|---|---|
+| **MCP Server** | `/functions/v1/mcp` | Native [Model Context Protocol](https://modelcontextprotocol.io) endpoint with tools for listing, creating, updating, deleting, and auto-filling analyses. Connect from Claude Desktop, Cursor, or any MCP client. |
+| **REST API** | `/functions/v1/api` | Standard CRUD with `GET`, `POST`, `PATCH`, `DELETE` and JSON responses. |
+| **OpenAPI Spec** | `/functions/v1/openapi` | Machine-readable API description for auto-discovery of endpoints, schemas, and operations. |
+| **Batch Operations** | `POST /functions/v1/api/batch` | Up to 50 create/update/delete operations in a single call. |
+| **Webhooks** | `/functions/v1/webhooks` | Subscribe to `analysis.created`, `analysis.updated`, `analysis.deleted` events with conditional filters (e.g., "confidence < 50%") and optional HMAC signature verification. |
+
 ---
 
 ## Getting Started
