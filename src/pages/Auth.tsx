@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,14 +28,21 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isLogin) {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Password reset link sent — check your email");
+        setMode("login");
+      } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in");
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast.success("Check your email to confirm your account");
+        toast.success("Account created — you're signed in");
       }
     } catch (err: any) {
       toast.error(err.message);
@@ -52,7 +59,7 @@ const Auth = () => {
             Scarcity Scout
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isLogin ? "Sign in to your account" : "Create a new account"}
+            {mode === "forgot" ? "Enter your email to receive a reset link" : mode === "login" ? "Sign in to your account" : "Create a new account"}
           </p>
         </div>
 
@@ -68,32 +75,49 @@ const Auth = () => {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLogin ? "Sign In" : "Sign Up"}
+            {mode === "forgot" ? "Send Reset Link" : mode === "login" ? "Sign In" : "Sign Up"}
           </Button>
+          {mode === "login" && (
+            <button
+              type="button"
+              onClick={() => setMode("forgot")}
+              className="w-full text-center text-xs text-muted-foreground hover:text-primary"
+            >
+              Forgot your password?
+            </button>
+          )}
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-primary hover:underline font-medium"
-          >
-            {isLogin ? "Sign Up" : "Sign In"}
-          </button>
+          {mode === "forgot" ? (
+            <button onClick={() => setMode("login")} className="text-primary hover:underline font-medium">
+              Back to Sign In
+            </button>
+          ) : mode === "login" ? (
+            <>Don't have an account?{" "}
+              <button onClick={() => setMode("signup")} className="text-primary hover:underline font-medium">Sign Up</button>
+            </>
+          ) : (
+            <>Already have an account?{" "}
+              <button onClick={() => setMode("login")} className="text-primary hover:underline font-medium">Sign In</button>
+            </>
+          )}
         </p>
       </div>
     </div>
